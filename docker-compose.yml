@@ -1,0 +1,22 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: services/admin/Dockerfile
+    ports:
+      - "4001:4001"
+    env_file:
+      - services/admin/.env
+    environment:
+      - NODE_ENV=production
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - gateway/.env
+    environment:
+      - NODE_ENV=production

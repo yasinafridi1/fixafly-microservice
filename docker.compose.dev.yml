@@ -1,0 +1,32 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile.dev
+    volumes:
+      - ./gateway:/gateway
+      - ./shared:/gateway/shared
+      - /gateway/node_modules
+    env_file:
+      - ./gateway/.env
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  admin:
+    build:
+      context: .
+      dockerfile: services/admin/Dockerfile.dev
+    volumes:
+      - ./services/admin:/service/admin
+      - ./shared:/service/admin/shared
+      - /service/admin/node_modules
+    env_file:
+      - ./services/admin/.env
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
