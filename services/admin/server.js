@@ -2,6 +2,7 @@ import express from "express";
 import routes from "./routes/index.js";
 import ErrorMiddleware from "./shared/middlewares/Error.js";
 import envVariables from "./config/constants.js";
+import mongoose from "mongoose";
 const { appPort, dbUrl } = envVariables;
 
 const app = express();
@@ -18,9 +19,18 @@ mongoose
     console.log(err);
   });
 
+app.use((req, res, next) => {
+  if (
+    req.headers["x-from-gateway"] !== "true" &&
+    req.headers["X-From-Gateway"] !== "true"
+  ) {
+    return res.status(403).json({ message: "Access denied: Use gateway only" });
+  }
+  next();
+});
+
 app.use("/", routes);
 
 app.listen(appPort, () => {
-  dbConnec;
-  console.log(`Server is running on port ${appPort}`);
+  console.log(`Admin is running on port ${appPort}`);
 });

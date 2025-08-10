@@ -1,11 +1,10 @@
 services:
   gateway:
     build:
-      context: .
-      dockerfile: gateway/Dockerfile.dev
+      context: ./gateway
+      dockerfile: Dockerfile.dev
     volumes:
       - ./gateway:/gateway
-      - ./shared:/gateway/shared
       - /gateway/node_modules
     env_file:
       - ./gateway/.env
@@ -17,8 +16,8 @@ services:
 
   admin:
     build:
-      context: .
-      dockerfile: services/admin/Dockerfile.dev
+      context: ./services/admin
+      dockerfile: Dockerfile.dev
     volumes:
       - ./services/admin:/service/admin
       - ./shared:/service/admin/shared

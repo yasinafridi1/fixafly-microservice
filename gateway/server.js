@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
-import router from "./routes";
+import router from "./routes/index.js";
 
 dotenv.config();
 
@@ -28,11 +28,6 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use("/api/v1", router);
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.json({ status: "Gateway is up and running" });
-});
 
 app.listen(PORT, () => {
   console.log(`Gateway server running on port ${PORT}`);
