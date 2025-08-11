@@ -21,7 +21,7 @@ services:
     volumes:
       - ./services/admin:/service/admin
       - ./shared:/service/admin/shared
-      - /service/admin/node_modules
+      - admin_node_modules:/service/admin/node_modules
     env_file:
       - ./services/admin/.env
     ports:
@@ -29,3 +29,5 @@ services:
     environment:
       - NODE_ENV=development
     command: npm run dev
+volumes:
+  admin_node_modules:

@@ -1,6 +1,5 @@
 import express from "express";
 import SuccessMessage from "../shared/utils/SuccessMessage.js";
-
 const router = express.Router();
 
 router.get("/health", (req, res) => {

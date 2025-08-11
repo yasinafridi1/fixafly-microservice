@@ -5,6 +5,12 @@ WORKDIR /service/admin
 COPY package*.json ./
 RUN npm install
 
+COPY start.sh ./
+
+# Give execute permission to start.sh
+RUN chmod +x ./start.sh
+
 EXPOSE 4001
 
-CMD ["npm", "run", "dev"]
+# Run start.sh instead of npm run dev directly
+CMD ["./start.sh"]
