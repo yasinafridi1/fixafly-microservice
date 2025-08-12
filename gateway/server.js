@@ -3,6 +3,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 import router from "./routes/index.js";
+import ErrorMiddleware from "./middlewares/Error.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use("/api/v1", router);
+app.use(ErrorMiddleware);
 
 app.listen(PORT, () => {
   console.log(`Gateway server running on port ${PORT}`);

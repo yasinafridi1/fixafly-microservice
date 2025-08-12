@@ -1,7 +1,5 @@
-import logError from "../utils/errorLogger.js";
-
 const ErrorMiddleware = (err, req, res, next) => {
-  logError(err);
+  console.log("=== Error console im gateway === ");
   err.message = err.message || "Internal server error";
   err.statusCode = err?.statusCode || 500;
 

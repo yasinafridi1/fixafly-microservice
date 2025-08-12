@@ -1,6 +1,6 @@
 import express from "express";
 import routes from "./routes/index.js";
-import ErrorMiddleware from "./shared/middlewares/Error.js";
+import ErrorMiddleware from "./middlewares/Error.js";
 import envVariables from "./config/constants.js";
 import mongoose from "mongoose";
 const { appPort, dbUrl } = envVariables;
@@ -32,5 +32,5 @@ app.use("/", routes);
 app.use(ErrorMiddleware);
 
 app.listen(appPort, () => {
-  console.log(`Admin is running on port ${appPort}`);
+  console.log(`Auth is running on port ${appPort}`);
 });

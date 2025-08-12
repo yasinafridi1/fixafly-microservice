@@ -10,6 +10,7 @@ const ErrorMiddleware = (err, req, res, next) => {
     err.message = err.details[0]?.message || "Validation error";
   }
 
+  console.log(err);
   return res.status(err.statusCode).json({
     success: false,
     message: err.message,

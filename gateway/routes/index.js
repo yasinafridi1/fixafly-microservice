@@ -10,8 +10,16 @@ router.get("/health", (req, res) => {
 router.use(
   "/admin",
   ...createGatewayProxy({
-    target: process.env.ADMIN_SERVICE_URL || "http://admin:4001",
+    target: process.env.ADMIN_SERVICE_URL,
     pathRewrite: { "^/admin": "" },
+  })
+);
+
+router.use(
+  "/auth",
+  ...createGatewayProxy({
+    target: process.env.AUTH_SERVICE_URL,
+    pathRewrite: { "^/auth": "" },
   })
 );
 

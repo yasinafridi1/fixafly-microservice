@@ -8,6 +8,10 @@ const envVariables = {
   awsAccessSecret: process.env.AWS_SECRET_ACCESS_KEY,
   awsRegion: process.env.AWS_REGION,
   s3Bucket: process.env.AWS_S3_BUCKET_NAME,
+  customerServiceUrl: process.env.CUSTOMER_SERVICE_URL,
+  vendorServiceUrl: process.env.VENDOR_SERVICE_URL,
+  authServiceUrl: process.env.AUTH_SERVICE_URL,
+  authServiceUrl: process.env.AUTH_SERVICE_URL,
 };
 
 export default envVariables;
