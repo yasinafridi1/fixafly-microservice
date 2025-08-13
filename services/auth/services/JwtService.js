@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import envVariables from "../config/constants.js";
-import LoginModel from "../models/loginModel.js";
+import LoginModel from "../models/LoginModel.js";
 
 const { accessTokenSecret, refreshTokenSecret } = envVariables;
 

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { USER_STATUS } from "../config/constants";
 
 const controllerSchema = new mongoose.Schema({
   _id: {
@@ -9,21 +10,34 @@ const controllerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+    required: true,
+  },
   fcmToken: {
     type: String,
     required: false,
     default: null,
   },
-  passwordTries: {
-    type: Number,
-    default: 0,
+  profilePicture: {
+    type: String,
     required: false,
+    default: null,
   },
-  lockUntil: {
-    type: Date,
-    default: null, // Date after which the account unlocks
+  status: {
+    type: String,
+    enum: Object.values(USER_STATUS),
+    default: USER_STATUS.active,
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false,
   },
 });
+
+controllerSchema.statics.softDeleteById = async function (id) {
+  return this.updateOne({ _id: id }, { isDeleted: true });
+};
 
 const ControllerModel = mongoose.model("controller", controllerSchema);
 export default ControllerModel;

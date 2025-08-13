@@ -18,15 +18,6 @@ const adminSchema = new mongoose.Schema({
     required: false,
     default: null,
   },
-  passwordTries: {
-    type: Number,
-    default: 0,
-    required: false,
-  },
-  lockUntil: {
-    type: Date,
-    default: null, // Date after which the account unlocks
-  },
 });
 
 const AdminModel = mongoose.model("admin", adminSchema);

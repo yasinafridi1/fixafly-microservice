@@ -12,7 +12,7 @@ const SuccessMessage = (res, message, data = null, status = 200) => {
     success: true,
     message,
     ...(data && {
-      ...data,
+      data,
     }),
   });
 };

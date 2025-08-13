@@ -14,4 +14,9 @@ const envVariables = {
   authServiceUrl: process.env.AUTH_SERVICE_URL,
 };
 
+export const USER_STATUS = {
+  active: "ACTIVE",
+  blocked: "BLOCKED",
+};
+
 export default envVariables;

@@ -1,9 +1,4 @@
 import Joi from "joi";
-import { USER_ROLES } from "../config/constants.js";
-
-const allowedRoles = Object.values(USER_ROLES).filter(
-  (role) => role !== USER_ROLES.admin
-);
 
 const emailSchema = Joi.string()
   .email({ tlds: { allow: true } }) // Disable strict TLD validation
@@ -13,6 +8,8 @@ const emailSchema = Joi.string()
     "string.empty": "Email is required.",
     "any.required": "Email is required.",
   });
+
+const fullNameSchema = Joi.string().required().max(70);
 
 const passwordSchema = Joi.string()
   .pattern(
@@ -34,7 +31,6 @@ export const signinSchema = Joi.object({
 export const signupSchema = Joi.object({
   email: emailSchema,
   password: passwordSchema,
-  role: Joi.string()
-    .valid(...allowedRoles)
-    .required(),
+  role: Joi.string().required(),
+  fullName: fullNameSchema,
 });

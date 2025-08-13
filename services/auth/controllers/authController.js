@@ -1,24 +1,44 @@
-import LoginModel from "../models/loginModel.js";
 import bcrypt from "bcrypt";
 import AsyncWrapper from "../utils/AsyncWrapper.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { generateTokens, storeTokens } from "../services/JwtService.js";
 import { userDto } from "../services/DTO.js";
 import SuccessMessage from "../utils/SuccessMessage.js";
+import { USER_ROLES } from "../config/constants.js";
+import LoginModel from "../models/LoginModel.js";
 
 export const login = AsyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
 
   const user = await LoginModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler("Incorrect email or password", 422));
+    return next(new ErrorHandler("Incorrect email or password", 400));
+  }
+
+  if (user.lockUntil && user.lockUntil > new Date()) {
+    const unlockTime = user.lockUntil.toLocaleString();
+    return next(
+      new ErrorHandler(`Account is locked. Try again after: ${unlockTime}`, 400)
+    );
   }
 
   const isPasswordMatched = await bcrypt.compare(password, user.password);
   if (!isPasswordMatched) {
-    return next(new ErrorHandler("Incorrect email or password", 422));
+    user.passwordTries += 1;
+    if (user.passwordTries >= 5) {
+      const lockTime =
+        user.role === USER_ROLES.admin
+          ? 15 * 60 * 60 * 1000
+          : 3 * 60 * 60 * 1000;
+      user.lockUntil = new Date(Date.now() + lockTime);
+    }
+    await user.save();
+    return next(new ErrorHandler("Incorrect email or password", 400));
   }
 
+  user.passwordTries = 0;
+  user.lockUntil = null;
+  await user.save();
   const { accessToken, refreshToken } = generateTokens({
     _id: user._id,
     role: user.role,

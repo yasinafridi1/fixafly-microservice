@@ -29,6 +29,15 @@ const loginSchema = new mongoose.Schema({
     enum: Object.values(USER_ROLES),
     default: USER_ROLES.customer,
   },
+  passwordTries: {
+    type: Number,
+    default: 0,
+    required: false,
+  },
+  lockUntil: {
+    type: Date,
+    default: null, // Date after which the account unlocks
+  },
 });
 
 loginSchema.pre("save", async function (next) {

@@ -21,7 +21,7 @@ services:
     volumes:
       - ./services/admin:/service/admin
       - ./shared:/service/admin/shared
-      - ./services/admin/node_modules:/service/admin/node_modules
+      - admin_node_modules:/service/admin/node_modules
     env_file:
       - ./services/admin/.env
     ports:
@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/auth:/service/auth
-      - ./services/auth/node_modules:/service/auth/node_modules
+      - auth_node_modules:/service/auth/node_modules
     env_file:
       - ./services/auth/.env
     ports:
@@ -44,3 +44,6 @@ services:
     environment:
       - NODE_ENV=development
     command: npm run dev
+volumes:
+  admin_node_modules:
+  auth_node_modules:
