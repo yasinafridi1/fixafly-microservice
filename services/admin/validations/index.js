@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { USER_ROLES, USER_STATUS } from "../config/constants";
 
 const emailSchema = Joi.string()
   .email({ tlds: { allow: true } }) // Disable strict TLD validation
@@ -28,9 +29,34 @@ export const signinSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-export const signupSchema = Joi.object({
+export const controllerSchema = Joi.object({
   email: emailSchema,
   password: passwordSchema,
-  role: Joi.string().required(),
   fullName: fullNameSchema,
+  role: Joi.string().valid(USER_ROLES.controller).required().messages({
+    "any.only": "Role must be CONTROLLER",
+    "string.empty": "Role is required",
+  }),
+
+  // ✅ Status can be ACTIVE or BLOCKED
+  status: Joi.string()
+    .valid(USER_STATUS.active, USER_STATUS.blocked)
+    .required()
+    .messages({
+      "any.only": `Status must be ${USER_STATUS.active} or ${USER_STATUS.blocked}`,
+      "string.empty": "Status is required",
+    }),
+});
+
+export const addEditServiceSchema = Joi.object({
+  name: fullNameSchema,
+  description: Joi.string().required().max(1500).messages({
+    "string.empty": "Description is required",
+    "string.max": "Description must not exceed 1500 characters",
+  }),
+  price: Joi.number().required().min(0).messages({
+    "number.base": "Price must be a number",
+    "number.min": "Price must be at least 0",
+    "any.required": "Price is required",
+  }),
 });

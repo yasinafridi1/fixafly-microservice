@@ -19,4 +19,11 @@ export const USER_STATUS = {
   blocked: "BLOCKED",
 };
 
+export const USER_ROLES = {
+  admin: "ADMIN",
+  controller: "CONTROLLER",
+  customer: "CUSTOMER",
+  vendor: "VENDOR",
+};
+
 export default envVariables;

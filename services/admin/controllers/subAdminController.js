@@ -1,6 +1,7 @@
-import { USER_STATUS } from "../config/constants.js";
+import { USER_ROLES, USER_STATUS } from "../config/constants.js";
 import SuccessMessage from "../shared/utils/SuccessMessage.js";
 import AsyncWrapper from "../shared/utils/AsyncWrapper.js";
+import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import axiosInstance from "../shared/utils/AxiosInstance.js";
 import ControllerModel from "../models/ControllerModel.js";
 import { controllerDTO } from "../helpers/dtos.js";
@@ -35,7 +36,7 @@ function generatePassword() {
   return password;
 }
 
-export const loginController = AsyncWrapper(async (req, res, next) => {
+export const login = AsyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await ControllerModel.findOne({ email, isDeleted: false });
   if (!user) {
@@ -72,7 +73,7 @@ export const loginController = AsyncWrapper(async (req, res, next) => {
 });
 
 export const addNewController = AsyncWrapper(async (req, res, next) => {
-  const { email, role, fullName } = req.body;
+  const { email, role, fullName, status } = req.body;
   const password = generatePassword();
   try {
     const response = await axiosInstance.post(`${authServiceUrl}/auth/signup`, {
@@ -85,9 +86,11 @@ export const addNewController = AsyncWrapper(async (req, res, next) => {
       _id: data._id,
       fullName: fullName,
       email,
+      status,
     });
     const result = await newController.save();
-    return SuccessMessage(res, "Controller added successfully", result);
+    const userData = controllerDTO(result, USER_ROLES.controller);
+    return SuccessMessage(res, "Controller added successfully", userData);
   } catch (error) {
     error.statusCode = error.response?.status || 500;
     error.message =
@@ -106,4 +109,102 @@ export const softDeleteController = AsyncWrapper(async (req, res, next) => {
 
   await ControllerModel.softDeleteById(req.params.id);
   return SuccessMessage(res, "Controller deleted successfully");
+});
+
+export const updateController = AsyncWrapper(async (req, res, next) => {
+  const { id } = req.params; // Controller ID
+  const { fullName, email, status } = req.body;
+
+  // Find the controller first
+  const controller = await ControllerModel.findById({
+    _id: id,
+    isDeleted: false,
+  });
+  if (!controller) {
+    return next(new ErrorHandler("Controller not found", 404));
+  }
+
+  // if (email !== controller.email) {
+  //   const existingController = await ControllerModel.findOne({
+  //     email: email,
+  //     _id: { $ne: id },
+  //   });
+  //   if (existingController) {
+  //     return next(new ErrorHandler("Email already exists", 400));
+  //   }
+  //   controller.email = email;
+  // }
+
+  // Update fields only if provided
+  controller.fullName = fullName;
+  controller.status = status;
+
+  // Save the changes
+  const result = await controller.save();
+  const userData = controllerDTO(result, USER_ROLES.controller);
+  return SuccessMessage(res, "Controller updated successfully", userData);
+});
+
+export const getAllControllers = AsyncWrapper(async (req, res, next) => {
+  const { page = 1, limit = 10, search = "", status } = req.query;
+
+  const pageNumber = parseInt(page, 10) || 1;
+  const pageLimit = parseInt(limit, 10) || 10;
+
+  // Build filter query
+  const filter = { isDeleted: false };
+  // ✅ Status filter (BLOCKED / ACTIVE)
+  if (status && ["BLOCKED", "ACTIVE"].includes(status)) {
+    filter.status = status;
+  }
+
+  // ✅ Search filter (fullName OR email)
+  if (search) {
+    filter.$or = [
+      { fullName: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  // ✅ Count total matching documents
+  const totalRecords = await ControllerModel.countDocuments(filter);
+
+  // ✅ Fetch paginated results
+  const controllers = await ControllerModel.find(filter)
+    .sort({ createdAt: -1 }) // latest first
+    .skip((pageNumber - 1) * pageLimit)
+    .limit(pageLimit);
+
+  const userData = controllers.map((item) =>
+    controllerDTO(item, USER_ROLES.controller)
+  );
+
+  return SuccessMessage(res, "Controllers fetched successfully", {
+    userData,
+    pagination: {
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / pageLimit),
+      page: pageNumber,
+      limit: pageLimit,
+    },
+  });
+});
+
+export const getControllerById = AsyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+
+  // ✅ Fetch controller by ID where not deleted
+  const controller = await ControllerModel.findOne({
+    _id: id,
+    isDeleted: false,
+  });
+
+  if (!controller) {
+    return next(new ErrorHandler("Controller not found", 404));
+  }
+
+  // ✅ Transform data with DTO
+  const userData = controllerDTO(controller, USER_ROLES.controller);
+
+  return SuccessMessage(res, "Controller fetched successfully", userData);
 });

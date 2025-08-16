@@ -20,7 +20,7 @@ const s3 = new AWS.S3({
  * @param {object} file - file object from multer (req.file)
  * @returns {Promise<string>} - resolves to uploaded file URL
  */
-export async function uploadFileToS3(file) {
+async function uploadFileToS3(file) {
   if (!file) throw new Error("No file provided");
 
   const fileName = generateRandomFileName(file.originalname);
@@ -35,3 +35,33 @@ export async function uploadFileToS3(file) {
   const data = await s3.upload(params).promise();
   return data.Location; // public URL
 }
+
+/**
+ * Delete a file from S3
+ * @param {string} fileUrl - Full public URL of the file
+ * @returns {Promise<void>}
+ */
+export async function deleteFileFromS3(fileUrl) {
+  if (!fileUrl) return;
+
+  // Extract the Key from the URL
+  // Example: https://bucket-name.s3.region.amazonaws.com/uploads/filename.jpg
+  const urlParts = fileUrl.split(`/${s3Bucket}/`);
+  if (urlParts.length < 2) return;
+
+  const Key = urlParts[1]; // uploads/filename.jpg
+
+  const params = {
+    Bucket: s3Bucket,
+    Key,
+  };
+
+  try {
+    await s3.deleteObject(params).promise();
+  } catch (err) {
+    console.error("Failed to delete file from S3:", err);
+    throw new Error("Failed to delete file from S3");
+  }
+}
+
+export default uploadFileToS3;
