@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { USER_STATUS } from "../config/constants.js";
 
-const controllerSchema = new mongoose.Schema({
+const customerSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: false,
@@ -13,6 +13,14 @@ const controllerSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+  },
+  vatNumber: {
+    type: String,
+    required: false,
   },
   fcmToken: {
     type: String,
@@ -29,15 +37,19 @@ const controllerSchema = new mongoose.Schema({
     enum: Object.values(USER_STATUS),
     default: USER_STATUS.active,
   },
+  role: {
+    type: String,
+    required: true,
+  },
   isDeleted: {
     type: Boolean,
     default: false,
   },
 });
 
-controllerSchema.statics.softDeleteById = async function (id) {
+customerSchema.statics.softDeleteById = async function (id) {
   return this.updateOne({ _id: id }, { isDeleted: true });
 };
 
-const ControllerModel = mongoose.model("controller", controllerSchema);
-export default ControllerModel;
+const CustomerModel = mongoose.model("customer", customerSchema);
+export default CustomerModel;

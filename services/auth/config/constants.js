@@ -11,6 +11,7 @@ const envVariables = {
 export const USER_ROLES = {
   admin: "ADMIN",
   customer: "CUSTOMER",
+  company: "COMPANY",
   controller: "CONTROLLER",
   technician: "TECHNICIAN",
 };
