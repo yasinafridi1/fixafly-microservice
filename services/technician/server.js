@@ -32,5 +32,5 @@ app.use("/", routes);
 app.use(ErrorMiddleware);
 
 app.listen(appPort, () => {
-  console.log(`Admin is running on port ${appPort}`);
+  console.log(`Technician is running on port ${appPort}`);
 });

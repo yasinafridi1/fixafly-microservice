@@ -187,7 +187,7 @@ export const getAllUser = AsyncWrapper(async (req, res, next) => {
 export const getUserById = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
-  // ✅ Fetch controller by ID where not deleted
+  // ✅ Fetch customer by ID where not deleted
   const user = await CustomerModel.findOne({
     _id: id,
     isDeleted: false,

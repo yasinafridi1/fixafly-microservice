@@ -1,4 +1,4 @@
-import { USER_ROLES, USER_STATUS } from "../config/constants.js";
+import envVariables, { USER_ROLES, USER_STATUS } from "../config/constants.js";
 import SuccessMessage from "../shared/utils/SuccessMessage.js";
 import AsyncWrapper from "../shared/utils/AsyncWrapper.js";
 import ErrorHandler from "../shared/utils/ErrorHandler.js";
@@ -6,6 +6,7 @@ import axiosInstance from "../shared/utils/AxiosInstance.js";
 import TechnicianModel from "../models/TechnicianModel.js";
 import { technicianDTO } from "../helpers/dtos.js";
 import uploadFileToS3, { deleteFileFromS3 } from "../shared/utils/AwsUtil.js";
+const { authServiceUrl } = envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
@@ -27,7 +28,7 @@ export const login = AsyncWrapper(async (req, res, next) => {
     });
     const { data } = response.data;
     const { accessToken, refreshToken, role } = data;
-    const userData = controllerDTO(user, role);
+    const userData = technicianDTO(user, role);
     return SuccessMessage(res, "Logged in successfully", {
       userData,
       accessToken,
@@ -44,7 +45,7 @@ export const login = AsyncWrapper(async (req, res, next) => {
 });
 
 export const newTechnician = AsyncWrapper(async (req, res, next) => {
-  const { email, role, fullName, status, password, lat, lng, phone } = req.body;
+  const { email, role, fullName, password, lat, lng, phone } = req.body;
   try {
     const response = await axiosInstance.post(`${authServiceUrl}/auth/signup`, {
       email,
@@ -57,14 +58,13 @@ export const newTechnician = AsyncWrapper(async (req, res, next) => {
       _id: data._id,
       fullName: fullName,
       email,
-      status,
       lat,
       lng,
       phone,
       profilePicture: profileUrl,
     });
     const result = await newTechnician.save();
-    const userData = technicianDTO(result, USER_ROLES.controller);
+    const userData = technicianDTO(result, USER_ROLES.technician);
     return SuccessMessage(res, "Technician added successfully", userData);
   } catch (error) {
     error.statusCode = error.response?.status || 500;
@@ -90,7 +90,7 @@ export const updateTechnician = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { fullName, lat, lng, phone } = req.body;
 
-  const technician = await TechnicianModel.findById({
+  const technician = await TechnicianModel.findOne({
     _id: id,
     isDeleted: false,
   });
@@ -168,7 +168,7 @@ export const getAllTechnician = AsyncWrapper(async (req, res, next) => {
 export const getTechnicianById = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
-  // ✅ Fetch controller by ID where not deleted
+  // ✅ Fetch technician by ID where not deleted
   const technician = await TechnicianModel.findOne({
     _id: id,
     isDeleted: false,
@@ -179,7 +179,27 @@ export const getTechnicianById = AsyncWrapper(async (req, res, next) => {
   }
 
   // ✅ Transform data with DTO
-  const userData = technicianDTO(controller, USER_ROLES.technician);
+  const userData = technicianDTO(technician, USER_ROLES.technician);
 
   return SuccessMessage(res, "Technician fetched successfully", userData);
+});
+
+export const updateTechnicianStatus = AsyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // ✅ Find user by ID where not deleted
+  const user = await TechnicianModel.findOne({ _id: id, isDeleted: false });
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  // ✅ Update status
+  user.status = status;
+  await user.save();
+
+  return SuccessMessage(
+    res,
+    `Technician status updated to ${status} successfully`
+  );
 });

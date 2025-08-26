@@ -37,14 +37,6 @@ export const technicianSchema = Joi.object({
     "any.only": "Invalid role",
     "string.empty": "Role is required",
   }),
-
-  status: Joi.string()
-    .valid(USER_STATUS.active, USER_STATUS.blocked)
-    .required()
-    .messages({
-      "any.only": `Status must be ${USER_STATUS.active} or ${USER_STATUS.blocked}`,
-      "string.empty": "Status is required",
-    }),
   lat: Joi.number().min(-90).max(90).required().messages({
     "number.base": "Latitude must be a number",
     "number.min": "Latitude cannot be less than -90",
@@ -66,7 +58,7 @@ export const technicianSchema = Joi.object({
     }),
 });
 
-export const updateTechinicianSchema = Joi.object({
+export const updateTechnicianSchema = Joi.object({
   fullName: fullNameSchema,
   lat: Joi.number().min(-90).max(90).messages({
     "number.base": "Latitude must be a number",
@@ -84,5 +76,15 @@ export const updateTechinicianSchema = Joi.object({
     .messages({
       "string.pattern.base": "Phone number must contain only digits",
       "string.empty": "Phone number is required",
+    }),
+});
+
+export const userStatusSchema = Joi.object({
+  status: Joi.string()
+    .valid(USER_STATUS.active, USER_STATUS.blocked)
+    .required()
+    .messages({
+      "any.only": `Status must be ${USER_STATUS.active} or ${USER_STATUS.blocked}`,
+      "string.empty": "Status is required",
     }),
 });

@@ -11,7 +11,6 @@ const envVariables = {
   customerServiceUrl: process.env.CUSTOMER_SERVICE_URL,
   technicianServiceUrl: process.env.VENDOR_SERVICE_URL,
   authServiceUrl: process.env.AUTH_SERVICE_URL,
-  authServiceUrl: process.env.AUTH_SERVICE_URL,
 };
 
 export const USER_STATUS = {
