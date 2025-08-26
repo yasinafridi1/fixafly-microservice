@@ -40,13 +40,6 @@ export const newCustomerSchema = Joi.object({
       "any.only": "Role must be either company or customer",
       "string.empty": "Role is required",
     }),
-  status: Joi.string()
-    .valid(USER_STATUS.active, USER_STATUS.blocked)
-    .required()
-    .messages({
-      "any.only": `Status must be ${USER_STATUS.active} or ${USER_STATUS.blocked}`,
-      "string.empty": "Status is required",
-    }),
   phone: Joi.string()
     .pattern(/^\d+$/) // only digits
     .required()
@@ -63,7 +56,7 @@ export const newCustomerSchema = Joi.object({
   }),
 });
 
-export const updateCustomer = Joi.object({
+export const updateCustomerSchema = Joi.object({
   fullName: fullNameSchema,
   phone: Joi.string()
     .pattern(/^\d+$/) // only digits
@@ -79,4 +72,14 @@ export const updateCustomer = Joi.object({
     }),
     otherwise: Joi.forbidden(), // not allowed if role is customer
   }),
+});
+
+export const userStatusSchema = Joi.object({
+  status: Joi.string()
+    .valid(USER_STATUS.active, USER_STATUS.blocked)
+    .required()
+    .messages({
+      "any.only": `Status must be ${USER_STATUS.active} or ${USER_STATUS.blocked}`,
+      "string.empty": "Status is required",
+    }),
 });

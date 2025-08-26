@@ -46,8 +46,7 @@ export const login = AsyncWrapper(async (req, res, next) => {
 });
 
 export const newCustomer = AsyncWrapper(async (req, res, next) => {
-  const { email, role, fullName, status, password, phone, vatNumber } =
-    req.body;
+  const { email, role, fullName, password, phone, vatNumber } = req.body;
   try {
     const response = await axiosInstance.post(`${authServiceUrl}/auth/signup`, {
       email,
@@ -60,7 +59,6 @@ export const newCustomer = AsyncWrapper(async (req, res, next) => {
       _id: data._id,
       fullName: fullName,
       email,
-      status,
       phone,
       role,
       vatNumber: role === USER_ROLES.company ? vatNumber : null,
@@ -208,5 +206,27 @@ export const getUserById = AsyncWrapper(async (req, res, next) => {
       user.role === USER_ROLES.company ? "Company" : "Customer "
     } detail fetched successfully`,
     userData
+  );
+});
+
+export const updateUserStatus = AsyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // ✅ Find user by ID where not deleted
+  const user = await CustomerModel.findOne({ _id: id, isDeleted: false });
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  // ✅ Update status
+  user.status = status;
+  await user.save();
+
+  return SuccessMessage(
+    res,
+    `${
+      user.role === USER_ROLES.company ? "Company" : "Customer"
+    } status updated to ${status} successfully`
   );
 });
