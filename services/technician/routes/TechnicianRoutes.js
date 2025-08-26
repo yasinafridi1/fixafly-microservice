@@ -1,5 +1,7 @@
 import express from "express";
-import validateBody from "../shared/middlewares/Validator.js";
+import validateBody, {
+  fileValidator,
+} from "../shared/middlewares/Validator.js";
 import {
   signinSchema,
   technicianSchema,
@@ -15,6 +17,8 @@ import {
   updateTechnicianStatus,
   login,
 } from "../controllers/technicianController.js";
+import upload from "../shared/services/MulterService.js";
+
 const router = express.Router();
 
 router.route("/signin").post(validateBody(signinSchema), login);
@@ -24,11 +28,17 @@ router
 router
   .route("/")
   .get(getAllTechnician)
-  .post(validateBody(technicianSchema), newTechnician);
+  .post(
+    [upload.single("file"), fileValidator, validateBody(technicianSchema)],
+    newTechnician
+  );
 router
   .route("/:id")
   .get(getTechnicianById)
-  .patch(validateBody(updateTechnicianSchema), updateTechnician)
+  .patch(
+    [upload.single("file"), validateBody(updateTechnicianSchema)],
+    updateTechnician
+  )
   .delete(softDeleteTechnician);
 
 export default router;

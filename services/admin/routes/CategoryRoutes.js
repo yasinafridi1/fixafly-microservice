@@ -1,5 +1,7 @@
 import express from "express";
-import validateBody from "../shared/middlewares/Validator.js";
+import validateBody, {
+  fileValidator,
+} from "../shared/middlewares/Validator.js";
 import upload from "../shared/services/MulterService.js";
 import {
   addCategory,
@@ -15,13 +17,15 @@ const router = express.Router();
 router
   .route("/")
   .get(getAllCategories)
-  .post(upload.single("file"), validateBody(addEditServiceSchema), addCategory);
+  .post(
+    [upload.single("file"), fileValidator, validateBody(addEditServiceSchema)],
+    addCategory
+  );
 router
   .route("/:id")
   .get(getCategoryById)
   .patch(
-    upload.single("file"),
-    validateBody(addEditServiceSchema),
+    [upload.single("file"), validateBody(addEditServiceSchema)],
     updateCategory
   )
   .delete(deleteCategory);
