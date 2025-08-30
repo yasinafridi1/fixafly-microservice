@@ -25,7 +25,7 @@ function deg2rad(deg) {
 //     location: {
 //       $near: {
 //         $geometry: { type: "Point", coordinates: [lng, lat] },
-//         $maxDistance: 10000, // 10 km
+//         $maxDistance: 10000, // 10 km if you want to search under limit else remove this line
 //       },
 //     },
 //     isDeleted: false,
