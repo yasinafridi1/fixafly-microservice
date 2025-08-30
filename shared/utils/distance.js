@@ -19,20 +19,48 @@ function deg2rad(deg) {
 
 24.65548, 46.699583;
 
-//  New optimized query by mongodb
+// New optimized query to find nearest
 // async function findNearestTechnicians(lat, lng, limit = 5) {
-//   const nearest = await TechnicianModel.find({
-//     location: {
-//       $near: {
-//         $geometry: { type: "Point", coordinates: [lng, lat] },
-//         $maxDistance: 10000, // 10 km if you want to search under limit else remove this line
+//   const nearest = await TechnicianModel.aggregate([
+//     {
+//       $geoNear: {
+//         near: { type: "Point", coordinates: [lng, lat] }, // [lng, lat]
+//         distanceField: "distance", // distance will be added in meters
+//         spherical: true, // use spherical distance calculation
+//         limit: limit, // top N nearest
 //       },
 //     },
-//     isDeleted: false,
-//   }).limit(limit);
+//     {
+//       $match: { isDeleted: false }, // ignore soft-deleted technicians
+//     },
+//   ]);
 
-//   return nearest;
+//   // Convert distance from meters to km and round
+//   return nearest.map((tech) => ({
+//     ...tech,
+//     distanceKm: (tech.distance / 1000).toFixed(2),
+//   }));
 // }
+
+// const customerLat = 24.65548;
+// const customerLng = 46.699583;
+
+// const nearestTechs = await findNearestTechnicians(customerLat, customerLng, 5);
+
+// console.log(nearestTechs);
+/*
+[
+  {
+    _id: "...",
+    fullName: "John Doe",
+    email: "john@example.com",
+    location: { type: "Point", coordinates: [46.7, 24.65] },
+    distance: 5234.12, // in meters
+    distanceKm: "5.23"
+  },
+  ...
+]
+*/
 
 // Optimized query to get nearest providers based on boundary Manual and old process
 /*{
