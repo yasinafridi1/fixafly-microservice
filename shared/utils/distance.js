@@ -17,10 +17,24 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-
 24.65548, 46.699583;
 
-// Optimized query to get nearest providers based on boundary
+//  New optimized query by mongodb
+// async function findNearestTechnicians(lat, lng, limit = 5) {
+//   const nearest = await TechnicianModel.find({
+//     location: {
+//       $near: {
+//         $geometry: { type: "Point", coordinates: [lng, lat] },
+//         $maxDistance: 10000, // 10 km
+//       },
+//     },
+//     isDeleted: false,
+//   }).limit(limit);
+
+//   return nearest;
+// }
+
+// Optimized query to get nearest providers based on boundary Manual and old process
 /*{
    async function findNearestProvider(customerLat, customerLon) {
   let boundary = 0.02; // initial ~2 km

@@ -6,6 +6,7 @@ import axiosInstance from "../shared/utils/AxiosInstance.js";
 import TechnicianModel from "../models/TechnicianModel.js";
 import { technicianDTO } from "../helpers/dtos.js";
 import uploadFileToS3, { deleteFileFromS3 } from "../shared/utils/AwsUtil.js";
+import { locationObjBuilder } from "../helpers/location.js";
 const { authServiceUrl } = envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
@@ -54,12 +55,12 @@ export const newTechnician = AsyncWrapper(async (req, res, next) => {
     });
     const { data } = response?.data;
     const profileUrl = await uploadFileToS3(req.file);
+    const location = locationObjBuilder(lat, lng);
     const newTechnician = new TechnicianModel({
       _id: data._id,
       fullName: fullName,
       email,
-      lat,
-      lng,
+      location,
       phone,
       profilePicture: profileUrl,
     });
@@ -98,6 +99,8 @@ export const updateTechnician = AsyncWrapper(async (req, res, next) => {
     return next(new ErrorHandler("Technician not found", 404));
   }
 
+  const location = locationObjBuilder(lat, lng);
+
   let imageUrl = technician.profilePicture;
   if (req.file) {
     // Delete previous image from S3 if exists
@@ -109,8 +112,7 @@ export const updateTechnician = AsyncWrapper(async (req, res, next) => {
   }
   // Update fields only if provided
   technician.fullName = fullName;
-  technician.lat = lat;
-  technician.lng = lng;
+  technician.location = location;
   technician.phone = phone;
   technician.profilePicture = imageUrl;
 

@@ -14,14 +14,6 @@ const technicianSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  lat: {
-    type: Number,
-    required: true,
-  },
-  lng: {
-    type: Number,
-    required: true,
-  },
   phone: {
     type: String,
     required: true,
@@ -40,6 +32,18 @@ const technicianSchema = new mongoose.Schema({
     type: String,
     enum: Object.values(USER_STATUS),
     default: USER_STATUS.blocked,
+  },
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number], // [lng, lat]
+      required: true,
+    },
   },
   isDeleted: {
     type: Boolean,
