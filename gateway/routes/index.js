@@ -16,6 +16,22 @@ router.use(
 );
 
 router.use(
+  "/technician",
+  ...createGatewayProxy({
+    target: process.env.TECHNICIAN_SERVICE_URL,
+    pathRewrite: { "^/technician": "" },
+  })
+);
+
+router.use(
+  "/customer",
+  ...createGatewayProxy({
+    target: process.env.CUSTOMER_SERVICE_URL,
+    pathRewrite: { "^/customer": "" },
+  })
+);
+
+router.use(
   "/auth",
   ...createGatewayProxy({
     target: process.env.AUTH_SERVICE_URL,

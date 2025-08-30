@@ -25,14 +25,14 @@ const router = express.Router();
 router.route("/signin").post(validateBody(signinSchema), login);
 router
   .route("/status/:id")
-  .patch(
-    [upload.single("file"), fileValidator, validateBody(userStatusSchema)],
-    updateUserStatus
-  );
+  .patch([validateBody(userStatusSchema)], updateUserStatus);
 router
   .route("/")
   .get(getAllUser)
-  .post(validateBody(newCustomerSchema), newCustomer);
+  .post(
+    [upload.single("file"), fileValidator, validateBody(newCustomerSchema)],
+    newCustomer
+  );
 
 router
   .route("/:id")

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { USER_ROLES, USER_STATUS } from "../config/constants";
+import { USER_ROLES, USER_STATUS } from "../config/constants.js";
 
 const emailSchema = Joi.string()
   .email({ tlds: { allow: true } }) // Disable strict TLD validation

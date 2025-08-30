@@ -5,12 +5,14 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const errorLogStream = fs.createWriteStream(
-  path.join(__dirname, "../error.log"),
-  {
-    flags: "a",
-  }
-);
+const logDir = path.join(__dirname, "../shared");
+const logFile = path.join(logDir, "error.log");
+
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+const errorLogStream = fs.createWriteStream(logFile, { flags: "a" });
 
 // Custom error logging function
 function logError(error) {

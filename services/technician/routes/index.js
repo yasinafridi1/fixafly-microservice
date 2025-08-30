@@ -7,6 +7,6 @@ router.get("/health", (req, res) => {
   return SuccessMessage(res, "Technician server is up and running");
 });
 
-router.use("/technician", TechnicianRoutes);
+router.use("/", TechnicianRoutes);
 
 export default router;

@@ -25,6 +25,7 @@ router.route("/signin").post(validateBody(signinSchema), login);
 router
   .route("/status/:id")
   .patch(validateBody(userStatusSchema), updateTechnicianStatus);
+
 router
   .route("/")
   .get(getAllTechnician)

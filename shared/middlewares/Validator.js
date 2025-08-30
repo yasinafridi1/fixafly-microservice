@@ -42,6 +42,9 @@ const validateBody = (schema) => {
 };
 
 export const fileValidator = AsyncWrapper(async (req, res, next) => {
+  if (!req.file) {
+    return next(new ErrorHandler("Profile picture is required", 422));
+  }
   const { error } = fileValidation.file.validate(req.file);
   if (error) {
     return next(new ErrorHandler(`File error: ${error.message}`, 422));

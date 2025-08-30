@@ -44,6 +44,41 @@ services:
     environment:
       - NODE_ENV=development
     command: npm run dev
+
+  technician:
+    build:
+      context: ./services/technician
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/technician:/service/technician
+      - ./shared:/service/technician/shared
+      - technician_node_modules:/service/technician/node_modules
+    env_file:
+      - ./services/technician/.env
+    ports:
+      - "4003:4003"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  customer:
+    build:
+      context: ./services/customer
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/customer:/service/customer
+      - ./shared:/service/customer/shared
+      - customer_node_modules:/service/customer/node_modules
+    env_file:
+      - ./services/customer/.env
+    ports:
+      - "4002:4002"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
 volumes:
   admin_node_modules:
   auth_node_modules:
+  technician_node_modules:
+  customer_node_modules:

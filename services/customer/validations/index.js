@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { USER_ROLES, USER_STATUS } from "../config/constants";
+import { USER_ROLES, USER_STATUS } from "../config/constants.js";
 
 const emailSchema = Joi.string()
   .email({ tlds: { allow: true } }) // Disable strict TLD validation
@@ -41,10 +41,11 @@ export const newCustomerSchema = Joi.object({
       "string.empty": "Role is required",
     }),
   phone: Joi.string()
-    .pattern(/^\d+$/) // only digits
+    .pattern(/^\+?\d+$/) // optional + at start, then digits only
     .required()
     .messages({
-      "string.pattern.base": "Phone number must contain only digits",
+      "string.pattern.base":
+        "Phone number must start with + (optional) and contain only digits",
       "string.empty": "Phone number is required",
     }),
   vatNumber: Joi.string().when("role", {
@@ -59,10 +60,11 @@ export const newCustomerSchema = Joi.object({
 export const updateCustomerSchema = Joi.object({
   fullName: fullNameSchema,
   phone: Joi.string()
-    .pattern(/^\d+$/) // only digits
+    .pattern(/^\+?\d+$/) // optional + at start, then digits only
     .required()
     .messages({
-      "string.pattern.base": "Phone number must contain only digits",
+      "string.pattern.base":
+        "Phone number must start with + (optional) and contain only digits",
       "string.empty": "Phone number is required",
     }),
   vatNumber: Joi.string().when("role", {
