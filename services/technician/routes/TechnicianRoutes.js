@@ -1,6 +1,6 @@
 import express from "express";
 import validateBody, {
-  fileValidator,
+  fileAndIdCardValidator,
 } from "../shared/middlewares/Validator.js";
 import {
   signinSchema,
@@ -17,29 +17,41 @@ import {
   updateTechnicianStatus,
   login,
 } from "../controllers/technicianController.js";
-import upload from "../shared/services/MulterService.js";
+import upload, {
+  uploadFileAndIdCard,
+} from "../shared/services/MulterService.js";
+import auth from "../shared/middlewares/Auth.js";
+import roleAuthorization from "../shared/middlewares/roleAuthorization.js";
+import { USER_ROLES } from "../config/constants.js";
 
 const router = express.Router();
 
 router.route("/signin").post(validateBody(signinSchema), login);
 router
   .route("/status/:id")
-  .patch(validateBody(userStatusSchema), updateTechnicianStatus);
+  .patch(
+    [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
+    updateTechnicianStatus
+  );
 
 router
   .route("/")
-  .get(getAllTechnician)
+  .get([auth, roleAuthorization(USER_ROLES.admin)], getAllTechnician)
   .post(
-    [upload.single("file"), fileValidator, validateBody(technicianSchema)],
+    [
+      uploadFileAndIdCard,
+      fileAndIdCardValidator,
+      validateBody(technicianSchema),
+    ],
     newTechnician
   );
 router
   .route("/:id")
-  .get(getTechnicianById)
+  .get(auth, getTechnicianById)
   .patch(
-    [upload.single("file"), validateBody(updateTechnicianSchema)],
+    [auth, upload.single("file"), validateBody(updateTechnicianSchema)],
     updateTechnician
   )
-  .delete(softDeleteTechnician);
+  .delete([auth, roleAuthorization(USER_ROLES.admin)], softDeleteTechnician);
 
 export default router;

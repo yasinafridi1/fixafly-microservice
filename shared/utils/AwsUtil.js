@@ -64,4 +64,22 @@ export async function deleteFileFromS3(fileUrl) {
   }
 }
 
+/**
+ * Upload 2 files (file + idCard) to S3
+ * @param {object} files - req.files from multer
+ * @returns {Promise<{fileUrl: string, idCardUrl: string}>}
+ */
+export async function uploadFileAndIdCardToS3(files) {
+  if (!files?.file?.[0] || !files?.idCard?.[0]) {
+    throw new Error("Both file and idCard are required for upload");
+  }
+
+  const [fileUrl, idCardUrl] = await Promise.all([
+    uploadFileToS3(files.file[0]),
+    uploadFileToS3(files.idCard[0]),
+  ]);
+
+  return { fileUrl, idCardUrl };
+}
+
 export default uploadFileToS3;

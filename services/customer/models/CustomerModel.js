@@ -35,7 +35,7 @@ const customerSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: Object.values(USER_STATUS),
-    default: USER_STATUS.blocked,
+    default: USER_STATUS.active,
   },
   role: {
     type: String,

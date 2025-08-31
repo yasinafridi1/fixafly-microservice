@@ -1,26 +1,7 @@
 import jwt from "jsonwebtoken";
-import envVariables from "../config/Constants.js";
-import User from "../models/UserModel.js";
+import envVariables from "../../config/Constants.js";
 
 const { accessTokenSecret, refreshTokenSecret } = envVariables;
-
-export const generateTokens = (payload) => {
-  const accessToken = jwt.sign(payload, accessTokenSecret, {
-    expiresIn: "24h",
-  });
-  const refreshToken = jwt.sign(payload, refreshTokenSecret, {
-    expiresIn: "30d",
-  });
-
-  return { accessToken, refreshToken };
-};
-
-export const storeTokens = async (accessToken, refreshToken, userId) => {
-  return await User.update(
-    { accessToken: accessToken, refreshToken: refreshToken },
-    { where: { userId } }
-  );
-};
 
 export const verifyAccessToken = async (token) => {
   try {

@@ -52,4 +52,30 @@ export const fileValidator = AsyncWrapper(async (req, res, next) => {
   next();
 });
 
+export const fileAndIdCardValidator = AsyncWrapper(async (req, res, next) => {
+  const file = req.files?.file?.[0];
+  const idCard = req.files?.idCard?.[0];
+
+  if (!file) {
+    return next(new ErrorHandler("Profile picture is required", 422));
+  }
+
+  if (!idCard) {
+    return next(new ErrorHandler("NIC picture is required", 422));
+  }
+
+  // Validate both
+  const fileError = fileValidation.file.validate(file).error;
+  const idCardError = fileValidation.file.validate(idCard).error;
+
+  if (fileError) {
+    return next(new ErrorHandler(`File error: ${fileError.message}`, 422));
+  }
+  if (idCardError) {
+    return next(new ErrorHandler(`ID Card error: ${idCardError.message}`, 422));
+  }
+
+  next();
+});
+
 export default validateBody;

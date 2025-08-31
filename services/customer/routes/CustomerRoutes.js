@@ -19,16 +19,23 @@ import {
   updateUserStatus,
 } from "../controllers/customerController.js";
 import upload from "../shared/services/MulterService.js";
+import auth from "../shared/middlewares/Auth.js";
+import roleAuthorization from "../shared/middlewares/roleAuthorization.js";
+import { USER_ROLES } from "../config/constants.js";
 
 const router = express.Router();
 
 router.route("/signin").post(validateBody(signinSchema), login);
 router
   .route("/status/:id")
-  .patch([validateBody(userStatusSchema)], updateUserStatus);
+  .patch(
+    [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
+    updateUserStatus
+  );
+
 router
   .route("/")
-  .get(getAllUser)
+  .get([auth, roleAuthorization(USER_ROLES.admin)], getAllUser)
   .post(
     [upload.single("file"), fileValidator, validateBody(newCustomerSchema)],
     newCustomer
@@ -36,12 +43,11 @@ router
 
 router
   .route("/:id")
-  .get(getUserById)
+  .get(auth, getUserById)
   .patch(
-    upload.single("file"),
-    validateBody(updateCustomerSchema),
+    [auth, upload.single("file"), validateBody(updateCustomerSchema)],
     updateCustomer
   )
-  .delete(softDeleteCustomer);
+  .delete([auth, roleAuthorization(USER_ROLES.admin)], softDeleteCustomer);
 
 export default router;

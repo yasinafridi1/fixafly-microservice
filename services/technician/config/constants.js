@@ -14,6 +14,7 @@ const envVariables = {
 };
 
 export const USER_STATUS = {
+  pending: "PENDING",
   active: "ACTIVE",
   blocked: "BLOCKED",
 };

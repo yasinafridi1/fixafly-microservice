@@ -5,7 +5,10 @@ import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import axiosInstance from "../shared/utils/AxiosInstance.js";
 import TechnicianModel from "../models/TechnicianModel.js";
 import { technicianDTO } from "../helpers/dtos.js";
-import uploadFileToS3, { deleteFileFromS3 } from "../shared/utils/AwsUtil.js";
+import uploadFileToS3, {
+  uploadFileAndIdCardToS3,
+  deleteFileFromS3,
+} from "../shared/utils/AwsUtil.js";
 import { locationObjBuilder } from "../helpers/location.js";
 const { authServiceUrl } = envVariables;
 
@@ -14,6 +17,10 @@ export const login = AsyncWrapper(async (req, res, next) => {
   const user = await TechnicianModel.findOne({ email, isDeleted: false });
   if (!user) {
     return next(new ErrorHandler("Incorrect email or password", 400));
+  }
+
+  if (user.status === USER_STATUS.pending) {
+    return next(new ErrorHandler("Your account is under verification.", 400));
   }
 
   if (user.status === USER_STATUS.blocked) {
@@ -54,7 +61,9 @@ export const newTechnician = AsyncWrapper(async (req, res, next) => {
       role,
     });
     const { data } = response?.data;
-    const profileUrl = await uploadFileToS3(req.file);
+
+    const { fileUrl, idCardUrl } = await uploadFileAndIdCardToS3(req.files);
+
     const location = locationObjBuilder(lat, lng);
     const newTechnician = new TechnicianModel({
       _id: data._id,
@@ -62,7 +71,8 @@ export const newTechnician = AsyncWrapper(async (req, res, next) => {
       email,
       location,
       phone,
-      profilePicture: profileUrl,
+      profilePicture: fileUrl,
+      idCard: idCardUrl,
     });
     const result = await newTechnician.save();
     const userData = technicianDTO(result, USER_ROLES.technician);

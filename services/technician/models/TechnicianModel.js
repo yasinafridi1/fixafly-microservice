@@ -31,7 +31,7 @@ const technicianSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: Object.values(USER_STATUS),
-    default: USER_STATUS.blocked,
+    default: USER_STATUS.pending,
   },
   location: {
     type: {
@@ -44,6 +44,10 @@ const technicianSchema = new mongoose.Schema({
       type: [Number], // [lng, lat]
       required: true,
     },
+  },
+  idCard: {
+    type: String,
+    required: true,
   },
   isDeleted: {
     type: Boolean,

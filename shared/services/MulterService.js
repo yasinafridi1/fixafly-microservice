@@ -5,7 +5,6 @@ const storage = multer.memoryStorage();
 
 // File filter to allow only image files
 function imageFileFilter(req, file, cb) {
-  // Allowed extensions / mime types
   const allowedMimeTypes = [
     "image/jpeg",
     "image/jpg",
@@ -26,8 +25,13 @@ const upload = multer({
   storage,
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // optional: limit file size to 5MB
+    fileSize: 10 * 1024 * 1024, // limit file size to 10MB
   },
 });
+
+export const uploadFileAndIdCard = upload.fields([
+  { name: "file", maxCount: 1 },
+  { name: "idCard", maxCount: 1 },
+]);
 
 export default upload;
