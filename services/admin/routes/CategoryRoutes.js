@@ -11,6 +11,9 @@ import {
   updateCategory,
 } from "../controllers/categoryController.js";
 import { addEditServiceSchema } from "../validations/index.js";
+import { USER_ROLES } from "../config/constants.js";
+import auth from "../shared/middlewares/Auth.js";
+import roleAuthorization from "../shared/middlewares/roleAuthorization.js";
 
 const router = express.Router();
 
@@ -18,16 +21,27 @@ router
   .route("/")
   .get(getAllCategories)
   .post(
-    [upload.single("file"), fileValidator, validateBody(addEditServiceSchema)],
+    [
+      auth,
+      roleAuthorization([USER_ROLES.admin, USER_ROLES.controller]),
+      upload.single("file"),
+      fileValidator,
+      validateBody(addEditServiceSchema),
+    ],
     addCategory
   );
 router
   .route("/:id")
-  .get(getCategoryById)
+  .get(auth, getCategoryById)
   .patch(
-    [upload.single("file"), validateBody(addEditServiceSchema)],
+    [
+      auth,
+      roleAuthorization([USER_ROLES.admin, USER_ROLES.controller]),
+      upload.single("file"),
+      validateBody(addEditServiceSchema),
+    ],
     updateCategory
   )
-  .delete(deleteCategory);
+  .delete([auth, roleAuthorization([USER_ROLES.admin])], deleteCategory);
 
 export default router;

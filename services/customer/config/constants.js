@@ -26,4 +26,17 @@ export const USER_ROLES = {
   company: "COMPANY",
 };
 
+export const BOOKING_STATUS = {
+  pending: "PENDING",
+  paid: "PAID",
+  rejected: "REJECTED",
+};
+
+export const ORDER_STATUS = {
+  pending: "PENDING",
+  inProgress: "IN_PROGRESS",
+  completed: "COMPLETED",
+  cancelled: "CANCELLED",
+};
+
 export default envVariables;
