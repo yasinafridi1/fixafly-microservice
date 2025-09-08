@@ -1,15 +1,28 @@
 import mongoose from "mongoose";
-import { BOOKING_STATUS, ORDER_STATUS } from "../config/constants.js";
+import {
+  AMOUNT_PER_KM,
+  ORDER_STATUS,
+  PAYMENT_STATUS,
+} from "../config/constants.js";
 
 const bookingSchema = new mongoose.Schema(
   {
     services: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        serviceId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Service", // reference to Service collection
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
       },
     ],
-    totalAmount: {
+    amountPerKM: {
+      type: Number,
+      default: AMOUNT_PER_KM,
+    },
+    bookingTotalAmount: {
       type: Number,
       required: true,
     },
@@ -29,7 +42,7 @@ const bookingSchema = new mongoose.Schema(
       default: null,
     },
     customer: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "customer",
       required: true,
     },
@@ -39,8 +52,8 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: Object.values(BOOKING_STATUS),
-      default: BOOKING_STATUS.pending,
+      enum: Object.values(PAYMENT_STATUS),
+      default: PAYMENT_STATUS.new,
     },
     orderStatus: {
       type: String,

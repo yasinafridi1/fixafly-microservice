@@ -11,6 +11,6 @@ router.get("/health", (req, res) => {
 
 router.use("/auth", AuthRoutes);
 router.use("/controller", SubAdminRoutes);
-router.use("/service", CategoryRoutes);
+router.use("/", CategoryRoutes);
 
 export default router;

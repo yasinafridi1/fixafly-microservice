@@ -215,3 +215,27 @@ export const updateTechnicianStatus = AsyncWrapper(async (req, res, next) => {
     `Technician status updated to ${status} successfully`
   );
 });
+
+export const getNearestTechnician = AsyncWrapper(async (req, res, next) => {
+  const { lat, lng, limit = 1 } = req.query;
+
+  const nearest = await TechnicianModel.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [parseFloat(lng), parseFloat(lat)],
+        },
+        distanceField: "distance",
+        spherical: true, // use spherical distance calculation
+      },
+    },
+    {
+      $match: { isDeleted: false, status: USER_STATUS.active },
+    },
+    {
+      $limit: parseInt(limit), // apply limit here
+    },
+  ]);
+  return SuccessMessage(res, "Nearest found successfully", nearest);
+});

@@ -31,7 +31,7 @@ const technicianSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: Object.values(USER_STATUS),
-    default: USER_STATUS.pending,
+    default: USER_STATUS.active,
   },
   location: {
     type: {
@@ -54,6 +54,8 @@ const technicianSchema = new mongoose.Schema({
     default: false,
   },
 });
+
+technicianSchema.index({ location: "2dsphere" });
 
 technicianSchema.statics.softDeleteById = async function (id) {
   return this.updateOne({ _id: id }, { isDeleted: true });

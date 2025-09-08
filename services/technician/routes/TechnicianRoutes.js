@@ -16,6 +16,7 @@ import {
   updateTechnician,
   updateTechnicianStatus,
   login,
+  getNearestTechnician,
 } from "../controllers/technicianController.js";
 import upload, {
   uploadFileAndIdCard,
@@ -28,15 +29,7 @@ const router = express.Router();
 
 router.route("/signin").post(validateBody(signinSchema), login);
 router
-  .route("/status/:id")
-  .patch(
-    [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
-    updateTechnicianStatus
-  );
-
-router
-  .route("/")
-  .get([auth, roleAuthorization(USER_ROLES.admin)], getAllTechnician)
+  .route("/signup")
   .post(
     [
       uploadFileAndIdCard,
@@ -45,6 +38,19 @@ router
     ],
     newTechnician
   );
+
+router.route("/nearest").get(getNearestTechnician);
+router
+  .route("/status/:id")
+  .patch(
+    [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
+    updateTechnicianStatus
+  );
+
+router
+  .route("/")
+  .get([auth, roleAuthorization(USER_ROLES.admin)], getAllTechnician);
+
 router
   .route("/:id")
   .get(auth, getTechnicianById)

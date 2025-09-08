@@ -12,6 +12,8 @@ const envVariables = {
   technicianServiceUrl: process.env.TECHNICIAN_SERVICE_URL,
   authServiceUrl: process.env.AUTH_SERVICE_URL,
   authServiceUrl: process.env.AUTH_SERVICE_URL,
+  accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
+  refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
 };
 
 export const USER_STATUS = {

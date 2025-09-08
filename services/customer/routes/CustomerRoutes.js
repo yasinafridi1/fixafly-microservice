@@ -27,19 +27,19 @@ const router = express.Router();
 
 router.route("/signin").post(validateBody(signinSchema), login);
 router
+  .route("/signup")
+  .post(
+    [upload.single("file"), fileValidator, validateBody(newCustomerSchema)],
+    newCustomer
+  );
+router
   .route("/status/:id")
   .patch(
     [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
     updateUserStatus
   );
 
-router
-  .route("/")
-  .get([auth, roleAuthorization(USER_ROLES.admin)], getAllUser)
-  .post(
-    [upload.single("file"), fileValidator, validateBody(newCustomerSchema)],
-    newCustomer
-  );
+router.route("/").get([auth, roleAuthorization(USER_ROLES.admin)], getAllUser);
 
 router
   .route("/:id")

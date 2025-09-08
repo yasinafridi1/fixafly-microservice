@@ -7,6 +7,7 @@ import {
   addCategory,
   deleteCategory,
   getAllCategories,
+  getCategoriesByIds,
   getCategoryById,
   updateCategory,
 } from "../controllers/categoryController.js";
@@ -16,6 +17,8 @@ import auth from "../shared/middlewares/Auth.js";
 import roleAuthorization from "../shared/middlewares/roleAuthorization.js";
 
 const router = express.Router();
+
+router.route("/list").post(getCategoriesByIds);
 
 router
   .route("/")
@@ -30,6 +33,7 @@ router
     ],
     addCategory
   );
+
 router
   .route("/:id")
   .get(auth, getCategoryById)

@@ -9,8 +9,11 @@ const envVariables = {
   awsRegion: process.env.AWS_REGION,
   s3Bucket: process.env.AWS_S3_BUCKET_NAME,
   customerServiceUrl: process.env.CUSTOMER_SERVICE_URL,
-  technicianServiceUrl: process.env.VENDOR_SERVICE_URL,
+  technicianServiceUrl: process.env.TECHNICIAN_SERVICE_URL,
   authServiceUrl: process.env.AUTH_SERVICE_URL,
+  adminServiceUrl: process.env.ADMIN_SERVICE_URL,
+  accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
+  refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
 };
 
 export const USER_STATUS = {
@@ -26,17 +29,19 @@ export const USER_ROLES = {
   company: "COMPANY",
 };
 
-export const BOOKING_STATUS = {
+export const PAYMENT_STATUS = {
   pending: "PENDING",
   paid: "PAID",
   rejected: "REJECTED",
 };
 
 export const ORDER_STATUS = {
-  pending: "PENDING",
+  new: "NEW",
   inProgress: "IN_PROGRESS",
   completed: "COMPLETED",
   cancelled: "CANCELLED",
 };
+
+export const AMOUNT_PER_KM = 10;
 
 export default envVariables;

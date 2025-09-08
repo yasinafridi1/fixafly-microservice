@@ -17,8 +17,6 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-24.65548, 46.699583;
-
 // New optimized query to find nearest
 // async function findNearestTechnicians(lat, lng, limit = 5) {
 //   const nearest = await TechnicianModel.aggregate([

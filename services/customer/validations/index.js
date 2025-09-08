@@ -85,3 +85,57 @@ export const userStatusSchema = Joi.object({
       "string.empty": "Status is required",
     }),
 });
+
+export const initialBookingSchema = Joi.object({
+  services: Joi.array()
+    .items(
+      Joi.object({
+        id: Joi.string().required().messages({
+          "string.base": "Service ID must be a string",
+          "any.required": "Service ID is required",
+        }),
+        quantity: Joi.number().integer().min(1).required().messages({
+          "number.base": "Quantity must be a number",
+          "number.min": "Quantity must be at least 1",
+          "any.required": "Quantity is required",
+        }),
+      })
+    )
+    .min(1)
+    .max(6)
+    .required()
+    .messages({
+      "array.base": "Services must be an array",
+      "array.min": "At least one service is required",
+      "any.required": "Services are required",
+      "array.max": "Max 6 services allowed",
+    }),
+
+  date: Joi.date().required().messages({
+    "date.base": "Date must be a valid date",
+    "any.required": "Date is required",
+  }),
+
+  time: Joi.string()
+    .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/) // HH:mm format
+    .required()
+    .messages({
+      "string.base": "Time must be a string",
+      "string.pattern.base": "Time must be in HH:mm format",
+      "any.required": "Time is required",
+    }),
+
+  comment: Joi.string().allow("", null).optional().messages({
+    "string.base": "Comment must be a string",
+  }),
+
+  lat: Joi.number().required().messages({
+    "number.base": "Latitude must be a number",
+    "any.required": "Latitude is required",
+  }),
+
+  lng: Joi.number().required().messages({
+    "number.base": "Longitude must be a number",
+    "any.required": "Longitude is required",
+  }),
+});

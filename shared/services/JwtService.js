@@ -8,6 +8,7 @@ export const verifyAccessToken = async (token) => {
     const decodedToken = jwt.verify(token, accessTokenSecret);
     return decodedToken;
   } catch (error) {
+    console.log("Error ====>", error);
     error.statusCode = 401; // Set custom status code for token verification errors
     error.message = "Token expired";
     throw error;
