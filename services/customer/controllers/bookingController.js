@@ -60,7 +60,6 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
     }
     technician = response?.data?.data[0];
   } catch (error) {
-    console.log("Error ===>", error.response?.data?.message || error?.message);
     error.statusCode = error.response?.status || 500;
     error.message =
       error?.response?.data?.message ||

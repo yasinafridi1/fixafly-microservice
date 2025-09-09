@@ -9,6 +9,8 @@ export const nearestTechnicianBookingAmount = (services, technician) => {
     return total + item.price * item.quantity;
   }, 0);
 
-  const totalBookingAmount = totalAmountOfKM + totalAmountOfServices;
+  const totalBookingAmount = Math.floor(
+    totalAmountOfKM + totalAmountOfServices
+  );
   return totalBookingAmount;
 };
