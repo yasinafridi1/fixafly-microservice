@@ -40,6 +40,14 @@ router.use(
 );
 
 router.use(
+  "/booking",
+  ...createGatewayProxy({
+    target: process.env.CUSTOMER_SERVICE_URL,
+    pathRewrite: { "^/booking": "" },
+  })
+);
+
+router.use(
   "/auth",
   ...createGatewayProxy({
     target: process.env.AUTH_SERVICE_URL,

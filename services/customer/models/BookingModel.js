@@ -10,8 +10,7 @@ const bookingSchema = new mongoose.Schema(
     services: [
       {
         serviceId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Service", // reference to Service collection
+          type: String,
           required: true,
         },
         quantity: { type: Number, required: true },
@@ -53,7 +52,7 @@ const bookingSchema = new mongoose.Schema(
     paymentStatus: {
       type: String,
       enum: Object.values(PAYMENT_STATUS),
-      default: PAYMENT_STATUS.new,
+      default: PAYMENT_STATUS.pending,
     },
     orderStatus: {
       type: String,

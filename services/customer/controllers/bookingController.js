@@ -5,6 +5,7 @@ import BookingModel from "../models/BookingModel.js";
 import axiosInstance from "../shared/utils/AxiosInstance.js";
 import envVariables, {
   ORDER_STATUS,
+  USER_ROLES,
   USER_STATUS,
 } from "../config/constants.js";
 import { nearestTechnicianBookingAmount } from "../helpers/calculator.js";
@@ -107,65 +108,59 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
   // find total amount based on nearest technician
 });
 
-export const getAllBookings = AsyncWrapper(async (req, res, next) => {});
-
-export const getCustomerBookings = AsyncWrapper(async (req, res, next) => {
+export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   let { limit = 10, page = 1, status } = req.query;
-  // Check if customer exists
-  const customer = await CustomerModel.findOne({
-    _id: req.user._id,
-    status: USER_STATUS.active,
-    isDeleted: false,
-  });
-  if (!customer) {
-    return next(new ErrorHandler("Customer not found", 404));
-  }
 
   // Convert to integers
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
 
-  // Build filter
-  const filter = { customer: req.user._id };
-  if (status) {
-    const statusUpper = status.toUpperCase();
-    if (Object.values(ORDER_STATUS).includes(statusUpper)) {
-      filter.orderStatus = statusUpper;
+  if (
+    req.user.role === USER_ROLES.company ||
+    req.user.role === USER_ROLES.customer
+  ) {
+    // Check if customer exists
+    const customer = await CustomerModel.findOne({
+      _id: req.user._id,
+      status: USER_STATUS.active,
+      isDeleted: false,
+    });
+    if (!customer) {
+      return next(new ErrorHandler("Customer not found", 404));
     }
+
+    const filter = { customer: req.user._id };
+    // Build filter
+
+    if (status) {
+      const statusUpper = status.toUpperCase();
+      if (Object.values(ORDER_STATUS).includes(statusUpper)) {
+        filter.orderStatus = statusUpper;
+      }
+    }
+
+    // Total count for pagination
+    const total = await BookingModel.countDocuments(filter);
+
+    // Fetch bookings with pagination
+    const bookings = await BookingModel.find(filter)
+      .sort({ createdAt: -1 }) // latest first
+      .skip(skip)
+      .limit(limit);
+
+    return SuccessMessage(res, "Customer bookings fetched successfully", {
+      bookingsData: bookings,
+      paginations: {
+        totalRecords: total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } else {
+    return SuccessMessage(res, "Booking fetched successfully");
   }
-
-  // Total count for pagination
-  const total = await BookingModel.countDocuments(filter);
-
-  // Fetch bookings with pagination
-  const bookings = await BookingModel.find(filter)
-    .sort({ createdAt: -1 }) // latest first
-    .skip(skip)
-    .limit(limit)
-    .populate("technician")
-    .populate("services.serviceId");
-
-  return SuccessMessage(res, "Customer bookings fetched successfully", {
-    bookingsData: bookings,
-    paginations: {
-      totalRecords: total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    },
-  });
-});
-
-export const getTechnicianBookings = AsyncWrapper(async (req, res, next) => {
-  const userId = req.user._id;
-  const bookings = await BookingModel.find({ technician: userId });
-
-  return SuccessMessage(
-    res,
-    "Technicians booking fetched successfully",
-    bookings
-  );
 });
 
 export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {});

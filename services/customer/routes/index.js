@@ -9,7 +9,7 @@ router.get("/health", (req, res) => {
   return SuccessMessage(res, "Customer server is up and running");
 });
 
-router.use("/", CustomerRoutes);
-router.use("/booking", BookingRoutes);
+router.use("/", BookingRoutes);
+router.use("/auth", CustomerRoutes);
 
 export default router;

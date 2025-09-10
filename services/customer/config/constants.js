@@ -37,6 +37,7 @@ export const PAYMENT_STATUS = {
 
 export const ORDER_STATUS = {
   new: "NEW",
+  accepted: "ACCEPTED",
   inProgress: "IN_PROGRESS",
   completed: "COMPLETED",
   cancelled: "CANCELLED",
