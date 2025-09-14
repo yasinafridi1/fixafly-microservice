@@ -16,6 +16,7 @@ const envVariables = {
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
   stripePublishKey: process.env.STRIPE_PUBLISH_KEY,
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+  stripeWebhookKey: process.env.STRIPE_WEBHOOK_KEY,
 };
 
 export const USER_STATUS = {
