@@ -57,7 +57,7 @@ const bookingSchema = new mongoose.Schema(
     orderStatus: {
       type: String,
       enum: Object.values(ORDER_STATUS),
-      default: ORDER_STATUS.pending,
+      default: ORDER_STATUS.new,
     },
     date: {
       type: Date,

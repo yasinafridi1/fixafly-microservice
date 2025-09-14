@@ -14,3 +14,29 @@ export const customerDto = (data, role) => {
     ...(role === USER_ROLES.company ? { vatNumber } : {}),
   };
 };
+
+export const bookingDto = (bookings, servicesData, technician = null) => {
+  // Create a lookup map for faster access
+  const serviceMap = {};
+  servicesData.forEach((service) => {
+    serviceMap[service._id] = service;
+  });
+
+  return bookings.map((booking) => {
+    const b = booking.toObject ? booking.toObject() : booking;
+
+    const updatedServices = b.services.map((s) => {
+      const serviceDetails = serviceMap[s.serviceId] || {};
+      return {
+        quantity: s.quantity,
+        ...serviceDetails, // merge all service fields at top level
+      };
+    });
+
+    return {
+      ...b,
+      services: updatedServices,
+      technician: technician || b.technician || null,
+    };
+  });
+};

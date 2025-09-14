@@ -138,13 +138,14 @@ export const getCategoryById = AsyncWrapper(async (req, res, next) => {
 });
 
 export const getCategoriesByIds = AsyncWrapper(async (req, res, next) => {
-  const ids = req.body.serviceIds;
+  let ids = req.body.serviceIds;
 
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
     return next(
       new ErrorHandler("Please provide an array of service IDs", 400)
     );
   }
+  ids = Array.from(new Set(ids));
 
   // Find services that match the IDs and are not deleted
   const services = await ServiceModel.find({
