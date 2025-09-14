@@ -11,8 +11,9 @@ import envVariables, {
 import { nearestTechnicianBookingAmount } from "../helpers/calculator.js";
 import { locationObjBuilder } from "../helpers/location.js";
 import CustomerModel from "../models/CustomerModel.js";
-
-const { adminServiceUrl, technicianServiceUrl } = envVariables;
+import Stripe from "stripe";
+const { adminServiceUrl, technicianServiceUrl, stripeSecretKey } = envVariables;
+const stripe = new Stripe(stripeSecretKey);
 
 export const initializeBooking = AsyncWrapper(async (req, res, next) => {
   const { services, date, time, comment, lat, lng } = req.body;
@@ -161,6 +162,40 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   } else {
     return SuccessMessage(res, "Booking fetched successfully");
   }
+});
+
+export const checkoutSession = AsyncWrapper(async (req, res, next) => {
+  const item = {
+    amount: 5000,
+    currency: "usd",
+    productName: "My Product",
+  };
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: item.currency,
+          unit_amount: item.amount, // in cents
+          product_data: {
+            name: item.productName,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: "https://your-app.com/success",
+    cancel_url: "https://your-app.com/cancel",
+    metadata: {
+      orderId: 15362736,
+    },
+  });
+
+  return SuccessMessage(res, "Checkout session created successfully", {
+    url: session.url,
+  });
 });
 
 export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {});

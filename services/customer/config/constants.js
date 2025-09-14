@@ -14,6 +14,8 @@ const envVariables = {
   adminServiceUrl: process.env.ADMIN_SERVICE_URL,
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
+  stripePublishKey: process.env.STRIPE_PUBLISH_KEY,
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY,
 };
 
 export const USER_STATUS = {

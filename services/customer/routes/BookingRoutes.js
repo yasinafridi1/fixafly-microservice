@@ -1,6 +1,7 @@
 import express from "express";
 import auth from "../shared/middlewares/Auth.js";
 import {
+  checkoutSession,
   getAllBookings,
   initializeBooking,
 } from "../controllers/bookingController.js";
@@ -13,5 +14,7 @@ router
   .route("/")
   .get(auth, getAllBookings)
   .post([auth, validateBody(initialBookingSchema)], initializeBooking);
+
+router.route("/checkout").post(checkoutSession);
 
 export default router;

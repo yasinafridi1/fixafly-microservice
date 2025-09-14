@@ -7,8 +7,6 @@ const { appPort, dbUrl } = envVariables;
 
 const app = express();
 
-app.use(express.json());
-
 mongoose
   .connect(dbUrl)
   .then(() => {
@@ -19,13 +17,19 @@ mongoose
   });
 
 app.use((req, res, next) => {
-  if (
-    req.headers["x-from-gateway"] !== "true" &&
-    req.headers["X-From-Gateway"] !== "true"
-  ) {
-    return res.status(403).json({ message: "Access denied: Use gateway only" });
+  if (req.originalUrl === "/webhook") {
+    next();
+  } else {
+    if (
+      req.headers["x-from-gateway"] !== "true" &&
+      req.headers["X-From-Gateway"] !== "true"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Access denied: Use gateway only" });
+    }
+    express.json()(req, res, next);
   }
-  next();
 });
 
 app.use("/", routes);
