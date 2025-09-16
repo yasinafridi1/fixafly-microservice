@@ -1,6 +1,12 @@
 import Stripe from "stripe";
-import envVariables from "../config/constants.js";
-const { stripeSecretKey, stripeWebhookKey } = envVariables;
+import envVariables, { PAYMENT_STATUS } from "../config/constants.js";
+import BookingModel from "../models/BookingModel.js";
+import PaymentModel from "../models/PaymentModel.js";
+import axiosInstance from "../shared/utils/AxiosInstance.js";
+import { locationObjDesctructure } from "../helpers/location.js";
+import { set } from "mongoose";
+const { stripeSecretKey, stripeWebhookKey, technicianServiceUrl } =
+  envVariables;
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -22,19 +28,58 @@ export const stripeWebhook = async (req, res) => {
 
   // ✅ Listen for checkout completed
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const orderId = session.metadata?.orderId;
+    setImmediate(async () => {
+      try {
+        const session = event.data.object;
+        const orderId = session.metadata?.orderId;
+        // create payment record
+        const newPayment = new PaymentModel({
+          id: session.id,
+          payment_intent: session.payment_intent,
+          customer_details: session.customer_details,
+          amount_total: Math.floor(session.amount_total / 100),
+          bookingId: orderId,
+          currency: session.currency,
+        });
+        const result = await newPayment.save({ validateBeforeSave: false });
+        // update booking payment status
+        const updated = await BookingModel.findByIdAndUpdate(orderId, {
+          paymentStatus: PAYMENT_STATUS.paid,
+          paymentRef: result._id,
+        });
 
-    console.log("✅ Payment completed for orderId:", orderId);
+        const { lat, lng } = locationObjDesctructure(updated.location);
 
-    // if (orderId) {
-    //   try {
-    //     await OrderModel.findByIdAndUpdate(orderId, { paymentStatus: "paid" });
-    //     console.log("✅ Order marked as paid:", orderId);
-    //   } catch (err) {
-    //     console.error("DB update failed:", err.message);
-    //   }
-    // }
+        let technicians = [];
+        try {
+          const response = await axiosInstance.get(
+            `${technicianServiceUrl}/nearest?lng=${lng}&lat=${lat}&limit=${5}`
+          );
+          if (!response?.data?.data?.length) {
+            return next(new ErrorHandler("No technician found for now", 404));
+          }
+          technicians = response?.data?.data;
+        } catch (error) {
+          error.statusCode = error.response?.status || 500;
+          error.message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Internal Server Error";
+          console.log("Error fetching technicians===>", error);
+        }
+
+        const ids = technicians?.map((tech) => {
+          // send notifications to nearest technicians
+          return tech._id;
+        });
+        BookingModel.updateOne(
+          { _id: orderId },
+          { nearestTechnicians: ids }
+        ).exec();
+      } catch (err) {
+        console.log("Error in webhook processing===>", err);
+      }
+    });
   }
 
   res.json({ received: true });

@@ -86,10 +86,8 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
     };
   });
 
-  const bookingTotalAmount = nearestTechnicianBookingAmount(
-    mergedServices,
-    technician
-  );
+  const { bookingTotalAmount, distanceInKm, totalAmountOfKM } =
+    nearestTechnicianBookingAmount(mergedServices, technician);
 
   const locationObject = locationObjBuilder(lat, lng);
 
@@ -101,6 +99,8 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
     customer: req.user._id,
     date,
     time,
+    distanceCharges: totalAmountOfKM,
+    distanceToTechnician: distanceInKm,
   });
 
   const result = await newBooking.save();
@@ -108,11 +108,12 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
   return SuccessMessage(res, "Booking initialized successfully", {
     result,
   });
-  // find total amount based on nearest technician
 });
 
 export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   let { limit = 10, page = 1, status } = req.query;
+
+  const { role, _id } = req.user;
 
   // Convert to integers
   page = parseInt(page) || 1;
@@ -122,55 +123,61 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   let filter = {};
   let servicesData = [];
 
-  if (
-    req.user.role === USER_ROLES.company ||
-    req.user.role === USER_ROLES.customer
-  ) {
-    // Check if customer exists
-    const customer = await CustomerModel.findOne({
-      _id: req.user._id,
-      status: USER_STATUS.active,
-      isDeleted: false,
-    });
-    if (!customer) {
-      return next(new ErrorHandler("Customer not found", 404));
+  // Validate status if provided
+  let uppercaseStatus;
+  if (status) {
+    const upper = status.toUpperCase();
+    if (Object.values(ORDER_STATUS).includes(upper)) {
+      uppercaseStatus = upper;
     }
-
-    filter = { customer: req.user._id };
-    // Build filter
-
-    if (status) {
-      const statusUpper = status.toUpperCase();
-      if (Object.values(ORDER_STATUS).includes(statusUpper)) {
-        filter.orderStatus = statusUpper;
-      }
-    }
-  } else {
-    return SuccessMessage(res, "Booking fetched successfully");
   }
 
-  const totalRecords = await BookingModel.countDocuments(filter);
-  const bookings = await BookingModel.find(filter)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+  if (role === USER_ROLES.company || role === USER_ROLES.customer) {
+    filter = { customer: _id };
+    // Build filter
 
-  const serviceIds = bookings.map((booking) => {
-    return booking?.services.map((service) => service.serviceId);
-  });
+    if (uppercaseStatus) {
+      filter.orderStatus = uppercaseStatus;
+    }
+  } else if (role === USER_ROLES.technician) {
+    if (uppercaseStatus) {
+      if (uppercaseStatus === ORDER_STATUS.new) {
+        filter.nearestTechnicians = { $in: [_id] };
+      } else {
+        filter.orderStatus = uppercaseStatus;
+        filter.technician = _id;
+      }
+    } else {
+      filter.technician = _id;
+    }
+  } else {
+    return next(new ErrorHandler("Unauthorized access", 403));
+  }
+
+  const [totalRecords, bookings] = await Promise.all([
+    BookingModel.countDocuments(filter),
+    BookingModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+  ]);
+
+  const serviceIds = bookings?.length
+    ? bookings.flatMap((b) => b?.services?.map((s) => s.serviceId))
+    : [];
+
   if (serviceIds.length) {
     try {
       const response = await axiosInstance.post(`${adminServiceUrl}/list`, {
-        serviceIds: serviceIds.flat(),
+        serviceIds,
       });
-      servicesData = response?.data?.data?.servicesData;
+      servicesData = response?.data?.data?.servicesData || [];
     } catch (error) {
-      error.statusCode = error.response?.status || 500;
-      error.message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Internal Server Error";
-      return next(error);
+      return next(
+        new ErrorHandler(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Internal Server Error",
+          error?.response?.status || 500
+        )
+      );
     }
   }
 
@@ -188,9 +195,11 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
 });
 
 export const checkoutSession = AsyncWrapper(async (req, res, next) => {
-  const booking = await BookingModel.findById(req.body.orderId).select(
-    "services bookingTotalAmount paymentStatus"
-  );
+  const booking = await BookingModel.findOne({
+    _id: req.body.orderId,
+    customer: req.user._id,
+    paymentStatus: PAYMENT_STATUS.pending,
+  }).select("services bookingTotalAmount paymentStatus distanceCharges");
 
   if (!booking) {
     return next(new ErrorHandler("Booking not found", 404));
@@ -233,7 +242,6 @@ export const checkoutSession = AsyncWrapper(async (req, res, next) => {
       price: s.price,
       name: full.name,
       image: full.image,
-      description: full.description,
     };
   });
 
@@ -244,12 +252,23 @@ export const checkoutSession = AsyncWrapper(async (req, res, next) => {
       unit_amount: Math.round(item.price * 100), // convert to cents
       product_data: {
         name: item.name,
-        description: item.description?.slice(0, 500) || "", // stripe limit ~500 chars
         images: item.image ? [item.image] : [],
       },
     },
     quantity: item.quantity,
   }));
+
+  line_items.push({
+    price_data: {
+      currency: "usd",
+      unit_amount: Math.round(booking.distanceCharges * 100),
+      product_data: {
+        name: "Distance Charges",
+        description: "Includes taxes, service fee, etc.",
+      },
+    },
+    quantity: 1,
+  });
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
@@ -263,12 +282,6 @@ export const checkoutSession = AsyncWrapper(async (req, res, next) => {
   });
 
   return SuccessMessage(res, "Checkout session created successfully", {
-    booking: {
-      _id: booking._id,
-      bookingTotalAmount: booking.bookingTotalAmount,
-      paymentStatus: booking.paymentStatus,
-      services: mergedServices,
-    },
     checkoutUrl: session.url, // you can send this to frontend to redirect user
   });
 });

@@ -67,6 +67,23 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    distanceCharges: {
+      type: Number,
+      default: 0,
+    },
+    distanceToTechnician: {
+      type: Number,
+      default: 0,
+    },
+    paymentRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "payment",
+      default: null,
+    },
+    nearestTechnicians: {
+      type: [String], // Array of nearest technician IDs
+      default: [],
+    },
   },
   { timestamps: true }
 );

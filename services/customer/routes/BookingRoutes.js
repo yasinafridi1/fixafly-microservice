@@ -15,6 +15,6 @@ router
   .get(auth, getAllBookings)
   .post([auth, validateBody(initialBookingSchema)], initializeBooking);
 
-router.route("/checkout").post(checkoutSession);
+router.route("/checkout").post(auth, checkoutSession);
 
 export default router;
