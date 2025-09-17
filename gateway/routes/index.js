@@ -24,6 +24,20 @@ router.use(
 );
 
 router.use(
+  "/query",
+  ...createGatewayProxy({
+    target: `${process.env.ADMIN_SERVICE_URL}/query`,
+  })
+);
+
+router.use(
+  "/banner",
+  ...createGatewayProxy({
+    target: `${process.env.ADMIN_SERVICE_URL}/banner`,
+  })
+);
+
+router.use(
   "/technician",
   ...createGatewayProxy({
     target: process.env.TECHNICIAN_SERVICE_URL,

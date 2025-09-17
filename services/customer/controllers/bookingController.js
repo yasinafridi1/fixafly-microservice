@@ -181,7 +181,7 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
     }
   }
 
-  const mappedResult = bookingDto(bookings, servicesData);
+  const mappedResult = bookingDto(bookings, servicesData, role);
 
   return SuccessMessage(res, "Bookings fetched successfully", {
     bookingsData: mappedResult,

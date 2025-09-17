@@ -15,7 +15,7 @@ export const customerDto = (data, role) => {
   };
 };
 
-export const bookingDto = (bookings, servicesData, technician = null) => {
+export const bookingDto = (bookings, servicesData, role, technician = null) => {
   // Create a lookup map for faster access
   const serviceMap = {};
   servicesData.forEach((service) => {
