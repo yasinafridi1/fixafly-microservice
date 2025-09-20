@@ -3,9 +3,10 @@ import AsyncWrapper from "../shared/utils/AsyncWrapper.js";
 import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import QueryModel from "../models/QueryModel.js";
 import uploadFileToS3 from "../shared/utils/AwsUtil.js";
+import { USER_ROLES } from "../config/constants.js";
 
 export const addQuery = AsyncWrapper(async (req, res, next) => {
-  const { subject, email, comment } = req.body;
+  const { subject, comment } = req.body;
 
   let attachment = null;
   if (req.file) {
@@ -14,7 +15,7 @@ export const addQuery = AsyncWrapper(async (req, res, next) => {
 
   const newQuery = new QueryModel({
     subject,
-    email,
+    by: req.user._id,
     comment,
     attachment,
   });
@@ -57,4 +58,19 @@ export const deleteQuery = AsyncWrapper(async (req, res, next) => {
   }
   await QueryModel.deleteOne({ _id: id });
   return SuccessMessage(res, "Query deleted successfully");
+});
+
+export const getAllQueries = AsyncWrapper(async (req, res, next) => {
+  let queries = [];
+  if (
+    req.user.role === USER_ROLES.customer ||
+    req.user.role === USER_ROLES.controller
+  ) {
+    queries = await QueryModel.find({ by: req.user._id }).sort({
+      createdAt: -1,
+    });
+  } else {
+    queries = await QueryModel.find().sort({ createdAt: -1 });
+  }
+  return SuccessMessage(res, "Queries fetched successfully", queries);
 });

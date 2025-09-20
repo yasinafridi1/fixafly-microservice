@@ -2,6 +2,7 @@ import SuccessMessage from "../shared/utils/SuccessMessage.js";
 import AsyncWrapper from "../shared/utils/AsyncWrapper.js";
 import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import uploadFileToS3, { deleteFileFromS3 } from "../shared/utils/AwsUtil.js";
+import BannerModel from "../models/BannerModel.js";
 
 export const addBanner = AsyncWrapper(async (req, res, next) => {
   const attachment = await uploadFileToS3(req.file);

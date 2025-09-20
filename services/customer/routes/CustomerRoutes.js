@@ -35,11 +35,17 @@ router
 router
   .route("/status/:id")
   .patch(
-    [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
+    [
+      auth,
+      roleAuthorization([USER_ROLES.admin]),
+      validateBody(userStatusSchema),
+    ],
     updateUserStatus
   );
 
-router.route("/").get([auth, roleAuthorization(USER_ROLES.admin)], getAllUser);
+router
+  .route("/")
+  .get([auth, roleAuthorization([USER_ROLES.admin])], getAllUser);
 
 router
   .route("/:id")
@@ -48,6 +54,6 @@ router
     [auth, upload.single("file"), validateBody(updateCustomerSchema)],
     updateCustomer
   )
-  .delete([auth, roleAuthorization(USER_ROLES.admin)], softDeleteCustomer);
+  .delete([auth, roleAuthorization([USER_ROLES.admin])], softDeleteCustomer);
 
 export default router;

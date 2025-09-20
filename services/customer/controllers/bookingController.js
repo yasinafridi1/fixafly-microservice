@@ -286,4 +286,60 @@ export const checkoutSession = AsyncWrapper(async (req, res, next) => {
   });
 });
 
-export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {});
+export const deleteBooking = AsyncWrapper(async (req, res, next) => {
+  const { bookingId } = req.params;
+  const booking = await BookingModel.findOneAndDelete({
+    _id: bookingId,
+    customer: req.user._id,
+    orderStatus: ORDER_STATUS.new,
+  });
+
+  if (!booking) {
+    return next(
+      new ErrorHandler("Booking not found or cannot be deleted", 404)
+    );
+  }
+
+  return SuccessMessage(res, "Booking deleted successfully");
+});
+
+export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
+  const { bookingId } = req.params;
+  const { status } = req.body;
+  const { _id } = req.user;
+
+  const booking = await BookingModel.findOne({ _id: bookingId });
+  if (!booking) {
+    return next(new ErrorHandler("Booking not found", 404));
+  }
+
+  if (
+    booking.orderStatus === ORDER_STATUS.new &&
+    status === ORDER_STATUS.inProgress
+  ) {
+    if (booking.nearestTechnicians.includes(_id)) {
+      booking.technician = _id;
+      booking.orderStatus = status;
+    } else {
+      return next(
+        new ErrorHandler("You are not authorized for this action", 403)
+      );
+    }
+  } else if (
+    booking.orderStatus === ORDER_STATUS.inProgress &&
+    status === ORDER_STATUS.completed
+  ) {
+    if (booking.technician === _id) {
+      booking.orderStatus = status;
+    } else {
+      return next(
+        new ErrorHandler("You are not authorized for this action", 403)
+      );
+    }
+  } else {
+    return next(new ErrorHandler("Invalid status transition", 400));
+  }
+
+  await booking.save();
+  return SuccessMessage(res, "Booking status updated successfully");
+});

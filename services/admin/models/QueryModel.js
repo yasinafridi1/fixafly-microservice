@@ -10,7 +10,7 @@ const querySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email: {
+    by: {
       type: String,
       required: true,
     },

@@ -43,13 +43,17 @@ router.route("/nearest").get(getNearestTechnician);
 router
   .route("/status/:id")
   .patch(
-    [auth, roleAuthorization(USER_ROLES.admin), validateBody(userStatusSchema)],
+    [
+      auth,
+      roleAuthorization([USER_ROLES.admin]),
+      validateBody(userStatusSchema),
+    ],
     updateTechnicianStatus
   );
 
 router
   .route("/")
-  .get([auth, roleAuthorization(USER_ROLES.admin)], getAllTechnician);
+  .get([auth, roleAuthorization([USER_ROLES.admin])], getAllTechnician);
 
 router
   .route("/:id")
@@ -58,6 +62,6 @@ router
     [auth, upload.single("file"), validateBody(updateTechnicianSchema)],
     updateTechnician
   )
-  .delete([auth, roleAuthorization(USER_ROLES.admin)], softDeleteTechnician);
+  .delete([auth, roleAuthorization([USER_ROLES.admin])], softDeleteTechnician);
 
 export default router;

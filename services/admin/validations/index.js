@@ -60,3 +60,14 @@ export const addEditServiceSchema = Joi.object({
     "any.required": "Price is required",
   }),
 });
+
+export const querySchema = Joi.object({
+  subject: Joi.string().required().max(255).messages({
+    "string.empty": "Subject is required",
+    "string.max": "Subject must not exceed 255 characters",
+  }),
+  comment: Joi.string().required().max(1000).messages({
+    "string.empty": "Comment is required",
+    "string.max": "Comment must not exceed 1000 characters",
+  }),
+});
