@@ -45,6 +45,9 @@ const customerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  passwordResetTries: { type: Number, default: 0 },
+  lastPasswordReset: { type: Date },
+  passwordResetBlockUntil: { type: Date },
 });
 
 customerSchema.statics.softDeleteById = async function (id) {

@@ -17,6 +17,8 @@ import {
   updateTechnicianStatus,
   login,
   getNearestTechnician,
+  getDashboardCardData,
+  getDashboardChartData,
 } from "../controllers/technicianController.js";
 import upload, {
   uploadFileAndIdCard,
@@ -28,6 +30,20 @@ import { USER_ROLES } from "../config/constants.js";
 const router = express.Router();
 
 router.route("/signin").post(validateBody(signinSchema), login);
+router
+  .route("/dashboard/card")
+  .get(
+    [auth, roleAuthorization([USER_ROLES.technician])],
+    getDashboardCardData
+  );
+
+router
+  .route("/dashboard/chart")
+  .get(
+    [auth, roleAuthorization([USER_ROLES.technician])],
+    getDashboardChartData
+  );
+
 router
   .route("/signup")
   .post(

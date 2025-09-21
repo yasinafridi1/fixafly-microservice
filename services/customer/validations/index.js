@@ -139,3 +139,28 @@ export const initialBookingSchema = Joi.object({
     "any.required": "Longitude is required",
   }),
 });
+
+export const sendOtpSchema = Joi.object({
+  email: emailSchema, // or your own emailSchema
+});
+
+export const verifyOtpSchema = Joi.object({
+  email: emailSchema, // or your own emailSchema
+  otp: Joi.string().length(6).required().messages({
+    "string.length": "OTP must be 6 characters long",
+    "string.empty": "OTP is required",
+    "any.required": "OTP is required",
+  }),
+  hashedOtp: Joi.string().required().messages({
+    "string.empty": "Hashed OTP is required",
+    "any.required": "Hashed OTP is required",
+  }),
+});
+
+export const updatePasswordSchema = Joi.object({
+  password: passwordSchema,
+  token: Joi.string().required().messages({
+    "string.empty": "Token is required",
+    "any.required": "Token is required",
+  }),
+});

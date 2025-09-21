@@ -14,6 +14,11 @@ const envVariables = {
   authServiceUrl: process.env.AUTH_SERVICE_URL,
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
+  smtpHost: process.env.SMTP_HOST,
+  supportEmail: process.env.SUPPORT_EMAIL,
+  supportEmailPassword: process.env.SUPPORT_EMAIL_PASSWORD,
+  otpSecret: process.env.OTP_SECRET,
+  shortTokenSecret: process.env.SHORT_TOKEN_SECRET,
 };
 
 export const USER_STATUS = {

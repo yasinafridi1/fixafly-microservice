@@ -4,18 +4,24 @@ import validateBody, {
 } from "../shared/middlewares/Validator.js";
 import {
   newCustomerSchema,
+  sendOtpSchema,
   signinSchema,
   updateCustomerSchema,
+  updatePasswordSchema,
   userStatusSchema,
+  verifyOtpSchema,
 } from "../validations/index.js";
 
 import {
+  forgetPassword,
   getAllUser,
   getUserById,
   login,
   newCustomer,
+  OtpVerification,
   softDeleteCustomer,
   updateCustomer,
+  updatePassword,
   updateUserStatus,
 } from "../controllers/customerController.js";
 import upload from "../shared/services/MulterService.js";
@@ -32,6 +38,17 @@ router
     [upload.single("file"), fileValidator, validateBody(newCustomerSchema)],
     newCustomer
   );
+router
+  .route("/forget-password")
+  .post(validateBody(sendOtpSchema), forgetPassword);
+router
+  .route("/otp-verification")
+  .post(validateBody(verifyOtpSchema), OtpVerification);
+
+router
+  .route("/update-password")
+  .patch(validateBody(updatePasswordSchema), updatePassword);
+
 router
   .route("/status/:id")
   .patch(

@@ -1,5 +1,7 @@
 import Joi from "joi";
-import { USER_ROLES } from "../config/constants.js";
+import envVariables, { USER_ROLES } from "../config/constants.js";
+
+const { updatePasswordTokenSecret } = envVariables;
 
 const allowedRoles = Object.values(USER_ROLES).filter(
   (role) => role !== USER_ROLES.admin
@@ -37,4 +39,17 @@ export const signupSchema = Joi.object({
   role: Joi.string()
     .valid(...allowedRoles)
     .required(),
+});
+
+export const updatePasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    "string.empty": "Token is required.",
+    "any.required": "Token is required.",
+  }),
+  password: passwordSchema.label("New Password"),
+  secret: Joi.string().valid(updatePasswordTokenSecret).required().messages({
+    "any.only": "Invalid secret provided.",
+    "string.empty": "Secret is required.",
+    "any.required": "Secret is required.",
+  }),
 });

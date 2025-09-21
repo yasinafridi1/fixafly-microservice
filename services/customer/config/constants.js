@@ -17,6 +17,12 @@ const envVariables = {
   stripePublishKey: process.env.STRIPE_PUBLISH_KEY,
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookKey: process.env.STRIPE_WEBHOOK_KEY,
+  smtpHost: process.env.SMTP_HOST,
+  supportEmail: process.env.SUPPORT_EMAIL,
+  supportEmailPassword: process.env.SUPPORT_EMAIL_PASSWORD,
+  otpSecret: process.env.OTP_SECRET,
+  shortTokenSecret: process.env.SHORT_TOKEN_SECRET,
+  updatePasswordTokenSecret: process.env.UPDATE_PASSWORD_TOKEN_SECRET,
 };
 
 export const USER_STATUS = {

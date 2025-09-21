@@ -10,7 +10,7 @@ import uploadFileToS3, {
   deleteFileFromS3,
 } from "../shared/utils/AwsUtil.js";
 import { locationObjBuilder } from "../helpers/location.js";
-const { authServiceUrl } = envVariables;
+const { authServiceUrl, customerServiceUrl } = envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
   const { email, password } = req.body;
@@ -238,4 +238,46 @@ export const getNearestTechnician = AsyncWrapper(async (req, res, next) => {
     },
   ]);
   return SuccessMessage(res, "Nearest found successfully", nearest);
+});
+
+export const getDashboardCardData = AsyncWrapper(async (req, res, next) => {
+  try {
+    const response = await axiosInstance.get(
+      `${customerServiceUrl}/analytics/technician/${req.user._id}`
+    );
+
+    return SuccessMessage(
+      res,
+      "Dashboard data fetched successfully",
+      response?.data?.data
+    );
+  } catch (error) {
+    error.statusCode = error.response?.status || 500;
+    error.message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Internal Server Error";
+    return next(error);
+  }
+});
+
+export const getDashboardChartData = AsyncWrapper(async (req, res, next) => {
+  try {
+    const response = await axiosInstance.get(
+      `${customerServiceUrl}/analytics/technician/chart/${req.user._id}`
+    );
+
+    return SuccessMessage(
+      res,
+      "Chart data fetched successfully",
+      response?.data?.data
+    );
+  } catch (error) {
+    error.statusCode = error.response?.status || 500;
+    error.message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Internal Server Error";
+    return next(error);
+  }
 });

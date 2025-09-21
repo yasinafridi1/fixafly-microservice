@@ -6,6 +6,8 @@ const envVariables = {
   appPort: process.env.PORT || 4004,
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
+  updatePasswordTokenSecret: process.env.UPDATE_PASSWORD_TOKEN_SECRET,
+  shortTokenSecret: process.env.SHORT_TOKEN_SECRET,
 };
 
 export const USER_ROLES = {

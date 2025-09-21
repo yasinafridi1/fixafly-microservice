@@ -1,7 +1,11 @@
 import bcrypt from "bcrypt";
 import AsyncWrapper from "../utils/AsyncWrapper.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
-import { generateTokens, storeTokens } from "../services/JwtService.js";
+import {
+  generateTokens,
+  storeTokens,
+  verifyShortToken,
+} from "../services/JwtService.js";
 import { userDto } from "../services/DTO.js";
 import SuccessMessage from "../utils/SuccessMessage.js";
 import { USER_ROLES } from "../config/constants.js";
@@ -73,4 +77,17 @@ export const register = AsyncWrapper(async (req, res, next) => {
   return SuccessMessage(res, "User registered successfully", {
     _id: result._id,
   });
+});
+
+export const updatePassword = AsyncWrapper(async (req, res, next) => {
+  const { token, password } = req.body;
+  const userData = verifyShortToken(token);
+  const user = await LoginModel.findOne({ _id: userData._id });
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
+  await user.save();
+  return SuccessMessage(res, "Password updated successfully");
 });

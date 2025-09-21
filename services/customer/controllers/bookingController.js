@@ -141,10 +141,10 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
     }
   } else if (role === USER_ROLES.technician) {
     if (uppercaseStatus) {
+      filter.orderStatus = uppercaseStatus;
       if (uppercaseStatus === ORDER_STATUS.new) {
         filter.nearestTechnicians = { $in: [_id] };
       } else {
-        filter.orderStatus = uppercaseStatus;
         filter.technician = _id;
       }
     } else {
@@ -182,7 +182,6 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   }
 
   const mappedResult = bookingDto(bookings, servicesData, role);
-
   return SuccessMessage(res, "Bookings fetched successfully", {
     bookingsData: mappedResult,
     paginations: {
@@ -307,6 +306,7 @@ export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
   const { bookingId } = req.params;
   const { status } = req.body;
   const { _id } = req.user;
+  console.log(status, "status");
 
   const booking = await BookingModel.findOne({ _id: bookingId });
   if (!booking) {
@@ -315,10 +315,21 @@ export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
 
   if (
     booking.orderStatus === ORDER_STATUS.new &&
-    status === ORDER_STATUS.inProgress
+    status === ORDER_STATUS.accepted
   ) {
     if (booking.nearestTechnicians.includes(_id)) {
       booking.technician = _id;
+      booking.orderStatus = status;
+    } else {
+      return next(
+        new ErrorHandler("You are not authorized for this action", 403)
+      );
+    }
+  } else if (
+    booking.orderStatus === ORDER_STATUS.accepted &&
+    status === ORDER_STATUS.inProgress
+  ) {
+    if (booking.technician === _id) {
       booking.orderStatus = status;
     } else {
       return next(
