@@ -112,10 +112,8 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
 
 export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   let { limit = 10, page = 1, status } = req.query;
-
   const { role, _id } = req.user;
 
-  // Convert to integers
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
   const skip = (page - 1) * limit;
@@ -123,7 +121,7 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   let filter = {};
   let servicesData = [];
 
-  // Validate status if provided
+  // validate status
   let uppercaseStatus;
   if (status) {
     const upper = status.toUpperCase();
@@ -134,8 +132,6 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
 
   if (role === USER_ROLES.company || role === USER_ROLES.customer) {
     filter = { customer: _id };
-    // Build filter
-
     if (uppercaseStatus) {
       filter.orderStatus = uppercaseStatus;
     }
@@ -154,11 +150,29 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
     return next(new ErrorHandler("Unauthorized access", 403));
   }
 
+  // build query
+  let bookingsQuery = BookingModel.find(filter)
+    .select(
+      "-__v -nearestTechnicians -paymentRef -amountPerKM -distanceCharges"
+    )
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  // only populate customer if role is NOT customer
+  if (role !== USER_ROLES.customer) {
+    bookingsQuery = bookingsQuery.populate(
+      "customer",
+      "_id fullName profilePicture email phone"
+    );
+  }
+
   const [totalRecords, bookings] = await Promise.all([
     BookingModel.countDocuments(filter),
-    BookingModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    bookingsQuery,
   ]);
 
+  // collect serviceIds
   const serviceIds = bookings?.length
     ? bookings.flatMap((b) => b?.services?.map((s) => s.serviceId))
     : [];
@@ -181,7 +195,32 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
     }
   }
 
-  const mappedResult = bookingDto(bookings, servicesData, role);
+  // fetch technicians if role is company or customer
+  let techniciansData = [];
+  if (role === USER_ROLES.company || role === USER_ROLES.customer) {
+    const technicianIds = bookings.map((b) => b.technician).filter((id) => id);
+    if (technicianIds.length) {
+      try {
+        const response = await axiosInstance.post(
+          `${technicianServiceUrl}/getMultiTechnicians`,
+          { technicianIds }
+        );
+        techniciansData = response?.data?.data || [];
+      } catch (error) {
+        return next(
+          new ErrorHandler(
+            error?.response?.data?.message ||
+              error?.message ||
+              "Internal Server Error",
+            error?.response?.status || 500
+          )
+        );
+      }
+    }
+  }
+
+  const mappedResult = bookingDto(bookings, servicesData, techniciansData);
+
   return SuccessMessage(res, "Bookings fetched successfully", {
     bookingsData: mappedResult,
     paginations: {

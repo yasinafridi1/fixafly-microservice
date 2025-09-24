@@ -281,3 +281,12 @@ export const getDashboardChartData = AsyncWrapper(async (req, res, next) => {
     return next(error);
   }
 });
+
+export const getMultiTechnicians = AsyncWrapper(async (req, res, next) => {
+  const { technicianIds } = req.body;
+  const technicians = await TechnicianModel.find({
+    _id: { $in: technicianIds },
+    isDeleted: false,
+  }).select("_id fullName profilePicture email phone");
+  return SuccessMessage(res, "Technicians fetched successfully", technicians);
+});
