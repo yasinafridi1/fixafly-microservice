@@ -35,9 +35,12 @@ export const initializeBooking = AsyncWrapper(async (req, res, next) => {
 
   // fetch services detail
   try {
-    const response = await axiosInstance.post(`${adminServiceUrl}/list`, {
-      serviceIds,
-    });
+    const response = await axiosInstance.post(
+      `${adminServiceUrl}/service/list`,
+      {
+        serviceIds,
+      }
+    );
 
     serviceData = response?.data?.data?.servicesData;
   } catch (error) {
@@ -179,9 +182,12 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
 
   if (serviceIds.length) {
     try {
-      const response = await axiosInstance.post(`${adminServiceUrl}/list`, {
-        serviceIds,
-      });
+      const response = await axiosInstance.post(
+        `${adminServiceUrl}/service/list`,
+        {
+          serviceIds,
+        }
+      );
       servicesData = response?.data?.data?.servicesData || [];
     } catch (error) {
       return next(
@@ -252,9 +258,12 @@ export const checkoutSession = AsyncWrapper(async (req, res, next) => {
 
   if (serviceIds?.length) {
     try {
-      const response = await axiosInstance.post(`${adminServiceUrl}/list`, {
-        serviceIds: serviceIds,
-      });
+      const response = await axiosInstance.post(
+        `${adminServiceUrl}/service/list`,
+        {
+          serviceIds: serviceIds,
+        }
+      );
       servicesData = response?.data?.data?.servicesData || [];
     } catch (error) {
       error.statusCode = error.response?.status || 500;
@@ -345,7 +354,6 @@ export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
   const { bookingId } = req.params;
   const { status } = req.body;
   const { _id } = req.user;
-  console.log(status, "status");
 
   const booking = await BookingModel.findOne({ _id: bookingId });
   if (!booking) {

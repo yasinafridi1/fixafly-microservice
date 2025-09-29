@@ -1,5 +1,9 @@
 import Joi from "joi";
-import { USER_ROLES, USER_STATUS } from "../config/constants.js";
+import {
+  SERVICE_STATUS,
+  USER_ROLES,
+  USER_STATUS,
+} from "../config/constants.js";
 
 const emailSchema = Joi.string()
   .email({ tlds: { allow: true } }) // Disable strict TLD validation
@@ -54,6 +58,12 @@ export const addEditServiceSchema = Joi.object({
     "string.empty": "Description is required",
     "string.max": "Description must not exceed 1500 characters",
   }),
+  status: Joi.string()
+    .valid(SERVICE_STATUS.active, SERVICE_STATUS.inactive)
+    .messages({
+      "any.only": `Status must be ${SERVICE_STATUS.active} or ${SERVICE_STATUS.blocked}`,
+      "string.empty": "Status is required",
+    }),
   price: Joi.number().required().min(0).messages({
     "number.base": "Price must be a number",
     "number.min": "Price must be at least 0",
@@ -69,5 +79,12 @@ export const querySchema = Joi.object({
   comment: Joi.string().required().max(1000).messages({
     "string.empty": "Comment is required",
     "string.max": "Comment must not exceed 1000 characters",
+  }),
+});
+
+export const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required().min(25).messages({
+    "string.empty": "Refresh token is required",
+    "string.min": "Refresh token is too short",
   }),
 });

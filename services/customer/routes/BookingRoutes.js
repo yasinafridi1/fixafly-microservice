@@ -15,6 +15,7 @@ import { USER_ROLES } from "../config/constants.js";
 const router = express.Router();
 
 router.route("/checkout").post(auth, checkoutSession);
+
 router
   .route("/")
   .get(auth, getAllBookings)

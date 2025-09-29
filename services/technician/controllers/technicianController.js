@@ -290,3 +290,26 @@ export const getMultiTechnicians = AsyncWrapper(async (req, res, next) => {
   }).select("_id fullName profilePicture email phone");
   return SuccessMessage(res, "Technicians fetched successfully", technicians);
 });
+
+export const getTechniciansStats = AsyncWrapper(async (req, res, next) => {
+  const stats = await TechnicianModel.aggregate([
+    { $match: { isDeleted: false } }, // ignore deleted technicians
+    {
+      $group: {
+        _id: null,
+        totalTechnicians: { $sum: 1 },
+        activeTechnicians: {
+          $sum: { $cond: [{ $eq: ["$status", USER_STATUS.active] }, 1, 0] },
+        },
+        blockedTechnicians: {
+          $sum: { $cond: [{ $eq: ["$status", USER_STATUS.blocked] }, 1, 0] },
+        },
+        pendingTechnicians: {
+          $sum: { $cond: [{ $eq: ["$status", USER_STATUS.pending] }, 1, 0] },
+        },
+      },
+    },
+    { $project: { _id: 0 } }, // remove _id from output
+  ]);
+  return SuccessMessage(res, "Technicians stats fetched successfully", stats);
+});

@@ -4,6 +4,7 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import {
   generateTokens,
   storeTokens,
+  verifyRefreshToken,
   verifyShortToken,
 } from "../services/JwtService.js";
 import { userDto } from "../services/DTO.js";
@@ -90,4 +91,42 @@ export const updatePassword = AsyncWrapper(async (req, res, next) => {
   user.password = hashedPassword;
   await user.save();
   return SuccessMessage(res, "Password updated successfully");
+});
+
+export const refreshSession = AsyncWrapper(async (req, res, next) => {
+  const { refreshToken: refreshTokenFromBody } = req.body;
+  const user = await verifyRefreshToken(refreshTokenFromBody);
+
+  const userData = await LoginModel.findOne({
+    _id: user._id,
+    role: user.role,
+    refreshToken: refreshTokenFromBody,
+  });
+
+  if (!userData) {
+    return next(new ErrorHandler("User not found", 400));
+  }
+
+  const { accessToken, refreshToken } = generateTokens({
+    _id: user._id,
+    role: user.role,
+  });
+  await storeTokens(accessToken, refreshToken, user._id);
+  const rehreshedData = userDto(user, accessToken, refreshToken);
+  return SuccessMessage(res, "Session refreshed", {
+    userData: rehreshedData,
+  });
+});
+
+export const logout = AsyncWrapper(async (req, res, next) => {
+  const user = await LoginModel.exists({ _id: req.params.id });
+  if (!user) {
+    return next("User not found", 404);
+  }
+
+  await LoginModel.updateOne(
+    { _id: req.params.id },
+    { accessToken: null, refreshToken: null }
+  );
+  return SuccessMessage(res, "Logout successfully", null, 200);
 });

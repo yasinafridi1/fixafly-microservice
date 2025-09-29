@@ -18,8 +18,7 @@ router.use(
 router.use(
   "/service",
   ...createGatewayProxy({
-    target: process.env.ADMIN_SERVICE_URL,
-    pathRewrite: { "^/service": "" },
+    target: `${process.env.ADMIN_SERVICE_URL}/service`,
   })
 );
 

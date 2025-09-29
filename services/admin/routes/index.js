@@ -5,6 +5,7 @@ import SubAdminRoutes from "./SubAdminRoutes.js";
 import CategoryRoutes from "./CategoryRoutes.js";
 import QueryRoutes from "./QueryRoutes.js";
 import BannerRoutes from "./BannerRoutes.js";
+import AdminRoutes from "./AdminRoutes.js";
 const router = express.Router();
 
 router.get("/health", (req, res) => {
@@ -15,6 +16,8 @@ router.use("/auth", AuthRoutes);
 router.use("/controller", SubAdminRoutes);
 router.use("/query", QueryRoutes);
 router.use("/banner", BannerRoutes);
-router.use("/", CategoryRoutes);
+router.use("/service", CategoryRoutes);
+router.use("/", AdminRoutes);
+router;
 
 export default router;

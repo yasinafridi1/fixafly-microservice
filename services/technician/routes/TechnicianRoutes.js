@@ -20,6 +20,7 @@ import {
   getDashboardCardData,
   getDashboardChartData,
   getMultiTechnicians,
+  getTechniciansStats,
 } from "../controllers/technicianController.js";
 import upload, {
   uploadFileAndIdCard,
@@ -33,6 +34,9 @@ const router = express.Router();
 router.route("/signin").post(validateBody(signinSchema), login);
 
 router.route("/getMultiTechnicians").post(getMultiTechnicians);
+router
+  .route("/admin/cards/stats")
+  .get([auth, roleAuthorization([USER_ROLES.admin])], getTechniciansStats);
 
 router
   .route("/dashboard/card")

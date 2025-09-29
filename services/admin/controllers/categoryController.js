@@ -4,9 +4,10 @@ import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import ServiceModel from "../models/ServiceModel.js";
 import uploadFileToS3, { deleteFileFromS3 } from "../shared/utils/AwsUtil.js";
 import { serviceDTO } from "../helpers/dtos.js";
+import { SERVICE_STATUS } from "../config/constants.js";
 
 export const addCategory = AsyncWrapper(async (req, res, next) => {
-  const { name, description, price } = req.body;
+  const { name, description, price, status } = req.body;
   const lowerCaseName = name.toLowerCase();
   const isExist = await ServiceModel.findOne({ name: lowerCaseName });
   if (isExist) {
@@ -20,6 +21,7 @@ export const addCategory = AsyncWrapper(async (req, res, next) => {
     description,
     price,
     image: url,
+    status,
   });
 
   const result = await service.save();
@@ -38,7 +40,7 @@ export const getAllCategories = AsyncWrapper(async (req, res, next) => {
   const pageLimit = parseInt(limit, 10) || 10;
 
   // ✅ Build filter query
-  const filter = { isDeleted: false };
+  const filter = { isDeleted: false, status: SERVICE_STATUS.active };
 
   // ✅ Search filter (by category name)
   if (search) {
@@ -79,18 +81,19 @@ export const deleteCategory = AsyncWrapper(async (req, res, next) => {
 
   // Delete image from S3 if exists
   if (category.image) {
-    await deleteFileFromS3(category.image); // implement your delete function
+    await deleteFileFromS3(category.image);
   }
 
   // Soft delete the category
-  await ServiceModel.updateOne({ _id: id }, { isDeleted: true });
+  category.isDeleted = true;
+  await category.save();
 
   return SuccessMessage(res, "Service deleted successfully");
 });
 
 export const updateCategory = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { name, description, price } = req.body;
+  const { name, description, price, status } = req.body;
 
   // Find the category first
   const category = await ServiceModel.findOne({ _id: id, isDeleted: false });
@@ -114,6 +117,7 @@ export const updateCategory = AsyncWrapper(async (req, res, next) => {
   category.description = description || category.description;
   category.price = price !== undefined ? price : category.price;
   category.image = imageUrl;
+  category.status = status ? status : category.status;
 
   await category.save();
 
@@ -159,5 +163,46 @@ export const getCategoriesByIds = AsyncWrapper(async (req, res, next) => {
 
   return SuccessMessage(res, "Services fetched successfully", {
     servicesData: services.map((service) => serviceDTO(service)),
+  });
+});
+
+export const getAllCategoriesAdmin = AsyncWrapper(async (req, res, next) => {
+  const { page = 1, limit = 10, search = "", status } = req.query;
+
+  const pageNumber = parseInt(page, 10) || 1;
+  const pageLimit = parseInt(limit, 10) || 10;
+
+  // ✅ Build filter query
+  const filter = { isDeleted: false };
+
+  if (status) {
+    filter.status = status.toUpperCase();
+  }
+
+  // ✅ Search filter (by category name)
+  if (search) {
+    filter.name = { $regex: search, $options: "i" }; // case-insensitive
+  }
+
+  // ✅ Count total categories
+  const totalRecords = await ServiceModel.countDocuments(filter);
+
+  // ✅ Fetch paginated results
+  const categories = await ServiceModel.find(filter)
+    .sort({ createdAt: -1 })
+    .skip((pageNumber - 1) * pageLimit)
+    .limit(pageLimit);
+
+  // ✅ Transform data with DTO
+  const serviceData = categories.map((item) => serviceDTO(item));
+
+  return SuccessMessage(res, "Services fetched successfully", {
+    serviceData,
+    pagination: {
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / pageLimit),
+      page: pageNumber,
+      limit: pageLimit,
+    },
   });
 });

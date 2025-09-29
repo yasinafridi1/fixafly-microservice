@@ -59,3 +59,46 @@ export const register = AsyncWrapper(async (req, res, next) => {
     return next(error);
   }
 });
+
+export const autoLogin = AsyncWrapper(async (req, res, next) => {
+  const { refreshToken: refreshTokenFromBody } = req.body;
+
+  try {
+    const response = await axiosInstance.post(
+      `${authServiceUrl}/auth/refresh_session`,
+      {
+        refreshToken: refreshTokenFromBody,
+      }
+    );
+    const { data } = response.data;
+    const { accessToken, refreshToken, role, _id } = data.userData;
+    const user = await AdminModel.findById(_id);
+    const userData = adminDTO(user, role);
+    return SuccessMessage(res, "Session refreshed", {
+      userData,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    error.statusCode = error.response?.status || 500;
+    error.message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Internal Server Error";
+    return next(error);
+  }
+});
+
+export const logoutAdmin = AsyncWrapper(async (req, res, next) => {
+  try {
+    await axiosInstance.get(`${authServiceUrl}/auth/logout/${req.user._id}`);
+    return SuccessMessage(res, "Logout successfully");
+  } catch (error) {
+    error.statusCode = error.response?.status || 500;
+    error.message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Internal Server Error";
+    return next(error);
+  }
+});

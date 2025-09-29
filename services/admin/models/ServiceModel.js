@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SERVICE_STATUS } from "../config/constants.js";
 
 const serviceSchema = new mongoose.Schema({
   name: {
@@ -16,6 +17,11 @@ const serviceSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true,
+  },
+  status: {
+    type: String,
+    enum: Object.values(SERVICE_STATUS),
+    default: SERVICE_STATUS.active,
   },
   isDeleted: {
     type: Boolean,

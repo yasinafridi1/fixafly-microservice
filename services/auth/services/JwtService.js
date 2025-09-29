@@ -7,10 +7,10 @@ const { accessTokenSecret, refreshTokenSecret, shortTokenSecret } =
 
 export const generateTokens = (payload) => {
   const accessToken = jwt.sign(payload, accessTokenSecret, {
-    expiresIn: "24h",
+    expiresIn: "5d",
   });
   const refreshToken = jwt.sign(payload, refreshTokenSecret, {
-    expiresIn: "3d",
+    expiresIn: "30d",
   });
 
   return { accessToken, refreshToken };
@@ -38,5 +38,16 @@ export const verifyShortToken = async (token) => {
     err.statusCode = 401; // Set custom status code for token verification errors
     err.message = "Token expired";
     throw err;
+  }
+};
+
+export const verifyRefreshToken = async (token) => {
+  try {
+    const decodedToken = jwt.verify(token, refreshTokenSecret);
+    return decodedToken;
+  } catch (error) {
+    error.statusCode = 401; // Set custom status code for token verification errors
+    error.message = "Token expired";
+    throw error;
   }
 };

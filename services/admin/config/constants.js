@@ -11,7 +11,6 @@ const envVariables = {
   customerServiceUrl: process.env.CUSTOMER_SERVICE_URL,
   technicianServiceUrl: process.env.TECHNICIAN_SERVICE_URL,
   authServiceUrl: process.env.AUTH_SERVICE_URL,
-  authServiceUrl: process.env.AUTH_SERVICE_URL,
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
   smtpHost: process.env.SMTP_HOST,
@@ -24,6 +23,11 @@ const envVariables = {
 export const USER_STATUS = {
   active: "ACTIVE",
   blocked: "BLOCKED",
+};
+
+export const SERVICE_STATUS = {
+  active: "ACTIVE",
+  inactive: "INACTIVE",
 };
 
 export const USER_ROLES = {

@@ -7,6 +7,7 @@ import {
   addCategory,
   deleteCategory,
   getAllCategories,
+  getAllCategoriesAdmin,
   getCategoriesByIds,
   getCategoryById,
   updateCategory,
@@ -19,6 +20,9 @@ import roleAuthorization from "../shared/middlewares/roleAuthorization.js";
 const router = express.Router();
 
 router.route("/list").post(getCategoriesByIds);
+router
+  .route("/admin_category")
+  .get([auth, roleAuthorization([USER_ROLES.admin])], getAllCategoriesAdmin);
 
 router
   .route("/")
