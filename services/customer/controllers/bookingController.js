@@ -13,7 +13,7 @@ import { nearestTechnicianBookingAmount } from "../helpers/calculator.js";
 import { locationObjBuilder } from "../helpers/location.js";
 import CustomerModel from "../models/CustomerModel.js";
 import Stripe from "stripe";
-import { bookingDto } from "../helpers/dtos.js";
+import { bookingAdminDTO, bookingDto } from "../helpers/dtos.js";
 const { adminServiceUrl, technicianServiceUrl, stripeSecretKey } = envVariables;
 const stripe = new Stripe(stripeSecretKey);
 
@@ -400,4 +400,103 @@ export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
 
   await booking.save();
   return SuccessMessage(res, "Booking status updated successfully");
+});
+
+export const allBookingAdmin = AsyncWrapper(async (req, res, next) => {
+  let { limit = 10, page = 1, status } = req.query;
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  let filter = {};
+  let servicesData = [];
+
+  if (status) {
+    filter.status = status.toUpperCase();
+  }
+
+  // build query
+  let bookingsQuery = BookingModel.find(filter)
+    .select(
+      "_id bookingTotalAmount customer technician paymentStatus orderStatus date time"
+    )
+    .populate("customer", "_id fullName")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const [totalRecords, bookings] = await Promise.all([
+    BookingModel.countDocuments(filter),
+    bookingsQuery,
+  ]);
+
+  // fetch technicians if role is company or customer
+  let techniciansData = [];
+  const technicianIds = bookings?.map((b) => b.technician).filter((id) => id);
+  if (technicianIds.length) {
+    try {
+      const response = await axiosInstance.post(
+        `${technicianServiceUrl}/getMultiTechnicians`,
+        { technicianIds }
+      );
+      techniciansData = response?.data?.data || [];
+    } catch (error) {
+      return next(
+        new ErrorHandler(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Internal Server Error",
+          error?.response?.status || 500
+        )
+      );
+    }
+  }
+
+  const mappedResult = bookingAdminDTO(bookings, techniciansData);
+
+  return SuccessMessage(res, "Bookings fetched successfully", {
+    bookingsData: mappedResult,
+    paginations: {
+      totalRecords,
+      page,
+      limit,
+      totalPages: Math.ceil(totalRecords / limit),
+    },
+  });
+});
+
+export const deleteBookingAdmin = AsyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+
+  const booking = await BookingModel.findOneAndDelete({
+    _id: id,
+  });
+
+  if (!booking) {
+    return next(
+      new ErrorHandler("Booking not found or cannot be deleted", 404)
+    );
+  }
+
+  return SuccessMessage(res, "Booking deleted successfully");
+});
+
+export const updateBookingAdmin = AsyncWrapper(async (req, res, next) => {
+  const { bookingId } = req.params;
+  const { orderStatus, paymentStatus } = req.body;
+
+  const booking = await BookingModel.findOne({ _id: bookingId });
+  if (!booking) {
+    return next(new ErrorHandler("Booking not found", 404));
+  }
+
+  booking.orderStatus = orderStatus;
+  booking.paymentStatus = paymentStatus;
+  await booking.save();
+  return SuccessMessage(res, "Booking status updated successfully", booking);
+});
+
+export const bookingDetailAdmin = AsyncWrapper(async (req, res, next) => {
+  return SuccessMessage(res, "Booking Detail fetched successfully");
 });

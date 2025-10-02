@@ -1,10 +1,14 @@
 import express from "express";
 import auth from "../shared/middlewares/Auth.js";
 import {
+  allBookingAdmin,
+  bookingDetailAdmin,
   checkoutSession,
   deleteBooking,
+  deleteBookingAdmin,
   getAllBookings,
   initializeBooking,
+  updateBookingAdmin,
   updateBookingStatus,
 } from "../controllers/bookingController.js";
 import { initialBookingSchema } from "../validations/index.js";
@@ -15,6 +19,15 @@ import { USER_ROLES } from "../config/constants.js";
 const router = express.Router();
 
 router.route("/checkout").post(auth, checkoutSession);
+router
+  .route("/allBookingAdmin")
+  .get([auth, roleAuthorization([USER_ROLES.admin])], allBookingAdmin);
+
+router
+  .route("/adminBooking/:id")
+  .delete([auth, roleAuthorization([USER_ROLES.admin])], deleteBookingAdmin)
+  .patch([auth, roleAuthorization([USER_ROLES.admin])], updateBookingAdmin)
+  .get([auth, roleAuthorization([USER_ROLES.admin])], bookingDetailAdmin);
 
 router
   .route("/")

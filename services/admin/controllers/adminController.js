@@ -30,10 +30,6 @@ export const getAdminDashboardStats = AsyncWrapper(async (req, res, next) => {
 
   let bookingStats = null;
   try {
-    console.log(
-      "Fetching booking stats from customer service",
-      customerServiceUrl
-    );
     const response = await axiosInstance.get(
       `${customerServiceUrl}/analytics/admin/card`,
       {

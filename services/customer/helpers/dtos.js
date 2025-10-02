@@ -58,3 +58,31 @@ export const bookingDto = (bookings, servicesData, techniciansData = []) => {
     };
   });
 };
+
+export const bookingAdminDTO = (bookings, techniciansData = []) => {
+  // Technician lookup
+  const technicianMap = {};
+  if (Array.isArray(techniciansData)) {
+    techniciansData.forEach((tech) => {
+      technicianMap[tech._id] = tech;
+    });
+  }
+
+  return bookings.map((booking) => {
+    const b = booking.toObject ? booking.toObject() : booking;
+
+    // Map technician (support both "technician" and "technicianId")
+    let technician = null;
+    if (b.technician && technicianMap[b.technician]) {
+      technician = technicianMap[b.technician];
+    } else if (b.technicianId && technicianMap[b.technicianId]) {
+      technician = technicianMap[b.technicianId];
+    }
+
+    return {
+      ...b,
+      technician, // mapped technician
+      // services remain untouched
+    };
+  });
+};
