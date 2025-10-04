@@ -31,7 +31,7 @@ const technicianSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: Object.values(USER_STATUS),
-    default: USER_STATUS.active,
+    default: USER_STATUS.pending,
   },
   location: {
     type: {

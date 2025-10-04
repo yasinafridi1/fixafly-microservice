@@ -66,14 +66,7 @@ router
 router.route("/nearest").get(getNearestTechnician);
 router
   .route("/status/:id")
-  .patch(
-    [
-      auth,
-      roleAuthorization([USER_ROLES.admin]),
-      validateBody(userStatusSchema),
-    ],
-    updateTechnicianStatus
-  );
+  .patch([auth, roleAuthorization([USER_ROLES.admin])], updateTechnicianStatus);
 
 router
   .route("/")

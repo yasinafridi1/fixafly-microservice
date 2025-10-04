@@ -217,7 +217,6 @@ export const getUserById = AsyncWrapper(async (req, res, next) => {
 
 export const updateUserStatus = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { status } = req.body;
 
   // ✅ Find user by ID where not deleted
   const user = await CustomerModel.findOne({ _id: id, isDeleted: false });
@@ -226,14 +225,18 @@ export const updateUserStatus = AsyncWrapper(async (req, res, next) => {
   }
 
   // ✅ Update status
-  user.status = status;
+  user.status =
+    user.status === USER_STATUS.active
+      ? USER_STATUS.blocked
+      : USER_STATUS.active;
   await user.save();
 
   return SuccessMessage(
     res,
     `${
       user.role === USER_ROLES.company ? "Company" : "Customer"
-    } status updated to ${status} successfully`
+    } status updated to successfully`,
+    user
   );
 });
 

@@ -8,6 +8,7 @@ export const addBanner = AsyncWrapper(async (req, res, next) => {
   const attachment = await uploadFileToS3(req.file);
   const newBanner = new BannerModel({
     image: attachment,
+    isActive: req.body.isActive === "ACTIVE",
   });
   const result = await newBanner.save();
   SuccessMessage(res, "Banner added successfully", result);
@@ -20,6 +21,7 @@ export const getAllBanners = AsyncWrapper(async (req, res, next) => {
 
 export const updateBanner = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
+  const { isActive } = req.body;
 
   const banner = await BannerModel.findById(id);
   if (!banner) {
@@ -35,7 +37,8 @@ export const updateBanner = AsyncWrapper(async (req, res, next) => {
     // Upload new image
     imageUrl = await uploadFileToS3(req.file);
   }
-  banner.isActive = req.body.status;
+
+  banner.isActive = isActive === "ACTIVE";
   banner.image = imageUrl;
   const result = await banner.save();
   SuccessMessage(res, "Banner status updated successfully", result);
@@ -47,6 +50,11 @@ export const deleteBanner = AsyncWrapper(async (req, res, next) => {
   if (!banner) {
     return next(new ErrorHandler("Banner not found", 404));
   }
-  await banner.remove();
+
+  // Delete image from S3 if exists
+  if (banner.image) {
+    await deleteFileFromS3(banner.image);
+  }
+  await banner.deleteOne({ _id: id });
   SuccessMessage(res, "Banner deleted successfully");
 });

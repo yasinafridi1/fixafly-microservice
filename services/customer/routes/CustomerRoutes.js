@@ -51,14 +51,7 @@ router
 
 router
   .route("/status/:id")
-  .patch(
-    [
-      auth,
-      roleAuthorization([USER_ROLES.admin]),
-      validateBody(userStatusSchema),
-    ],
-    updateUserStatus
-  );
+  .patch([auth, roleAuthorization([USER_ROLES.admin])], updateUserStatus);
 
 router
   .route("/")

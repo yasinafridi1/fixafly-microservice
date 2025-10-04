@@ -198,7 +198,6 @@ export const getTechnicianById = AsyncWrapper(async (req, res, next) => {
 
 export const updateTechnicianStatus = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { status } = req.body;
 
   // ✅ Find user by ID where not deleted
   const user = await TechnicianModel.findOne({ _id: id, isDeleted: false });
@@ -206,14 +205,15 @@ export const updateTechnicianStatus = AsyncWrapper(async (req, res, next) => {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  // ✅ Update status
-  user.status = status;
+  user.status =
+    user.status === USER_STATUS.pending
+      ? USER_STATUS.active
+      : user.status === USER_STATUS.active
+      ? USER_STATUS.blocked
+      : USER_STATUS.active;
   await user.save();
 
-  return SuccessMessage(
-    res,
-    `Technician status updated to ${status} successfully`
-  );
+  return SuccessMessage(res, `Technician status updated successfully`, user);
 });
 
 export const getNearestTechnician = AsyncWrapper(async (req, res, next) => {
