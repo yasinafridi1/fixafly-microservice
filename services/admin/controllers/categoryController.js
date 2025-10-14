@@ -7,7 +7,7 @@ import { serviceDTO } from "../helpers/dtos.js";
 import { SERVICE_STATUS } from "../config/constants.js";
 
 export const addCategory = AsyncWrapper(async (req, res, next) => {
-  const { name, description, price, status } = req.body;
+  const { name, description, price, status, visibilityStatus } = req.body;
   const lowerCaseName = name.toLowerCase();
   const isExist = await ServiceModel.findOne({ name: lowerCaseName });
   if (isExist) {
@@ -22,6 +22,7 @@ export const addCategory = AsyncWrapper(async (req, res, next) => {
     price,
     image: url,
     status,
+    visibilityStatus,
   });
 
   const result = await service.save();
@@ -93,7 +94,7 @@ export const deleteCategory = AsyncWrapper(async (req, res, next) => {
 
 export const updateCategory = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { name, description, price, status } = req.body;
+  const { name, description, price, status, visibilityStatus } = req.body;
 
   // Find the category first
   const category = await ServiceModel.findOne({ _id: id, isDeleted: false });
@@ -118,6 +119,7 @@ export const updateCategory = AsyncWrapper(async (req, res, next) => {
   category.price = price !== undefined ? price : category.price;
   category.image = imageUrl;
   category.status = status ? status : category.status;
+  category.visibilityStatus = visibilityStatus;
 
   await category.save();
 
@@ -167,33 +169,44 @@ export const getCategoriesByIds = AsyncWrapper(async (req, res, next) => {
 });
 
 export const getAllCategoriesAdmin = AsyncWrapper(async (req, res, next) => {
-  const { page = 1, limit = 10, search = "", status } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    status,
+    visibilityStatus,
+  } = req.query;
 
   const pageNumber = parseInt(page, 10) || 1;
   const pageLimit = parseInt(limit, 10) || 10;
 
-  // ✅ Build filter query
   const filter = { isDeleted: false };
 
   if (status) {
-    filter.status = status.toUpperCase();
+    const statusArray = Array.isArray(status)
+      ? status
+      : status.split(",").map((s) => s.trim().toUpperCase());
+    filter.status = { $in: statusArray };
   }
 
-  // ✅ Search filter (by category name)
+  if (visibilityStatus) {
+    const visibilityArray = Array.isArray(visibilityStatus)
+      ? visibilityStatus
+      : visibilityStatus.split(",").map((v) => v.trim().toUpperCase());
+    filter.visibilityStatus = { $in: visibilityArray };
+  }
+
   if (search) {
-    filter.name = { $regex: search, $options: "i" }; // case-insensitive
+    filter.name = { $regex: search, $options: "i" };
   }
 
-  // ✅ Count total categories
   const totalRecords = await ServiceModel.countDocuments(filter);
 
-  // ✅ Fetch paginated results
   const categories = await ServiceModel.find(filter)
     .sort({ createdAt: -1 })
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
 
-  // ✅ Transform data with DTO
   const serviceData = categories.map((item) => serviceDTO(item));
 
   return SuccessMessage(res, "Services fetched successfully", {

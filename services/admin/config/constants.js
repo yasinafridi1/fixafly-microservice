@@ -37,4 +37,9 @@ export const USER_ROLES = {
   vendor: "VENDOR",
 };
 
+export const SERVICE_VISIBILITY_STATUS = {
+  private: "PRIVATE",
+  business: "BUSINESS",
+};
+
 export default envVariables;

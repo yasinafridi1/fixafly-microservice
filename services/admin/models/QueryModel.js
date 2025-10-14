@@ -14,6 +14,14 @@ const querySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    role: {
+      type: String,
+      required: false,
+    },
+    userEmail: {
+      type: String,
+      required: false,
+    },
     attachment: {
       type: String,
       required: false,

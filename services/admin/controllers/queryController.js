@@ -2,11 +2,11 @@ import SuccessMessage from "../shared/utils/SuccessMessage.js";
 import AsyncWrapper from "../shared/utils/AsyncWrapper.js";
 import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import QueryModel from "../models/QueryModel.js";
-import uploadFileToS3 from "../shared/utils/AwsUtil.js";
+import uploadFileToS3, { deleteFileFromS3 } from "../shared/utils/AwsUtil.js";
 import { USER_ROLES } from "../config/constants.js";
 
 export const addQuery = AsyncWrapper(async (req, res, next) => {
-  const { subject, comment } = req.body;
+  const { subject, comment, email } = req.body;
 
   let attachment = null;
   if (req.file) {
@@ -16,6 +16,8 @@ export const addQuery = AsyncWrapper(async (req, res, next) => {
   const newQuery = new QueryModel({
     subject,
     by: req.user._id,
+    role: req.user.role,
+    userEmail: email,
     comment,
     attachment,
   });
@@ -56,21 +58,52 @@ export const deleteQuery = AsyncWrapper(async (req, res, next) => {
   if (!query) {
     return next(new ErrorHandler("Query not found", 404));
   }
+
+  if (query?.attachment) {
+    await deleteFileFromS3(query?.attachment);
+  }
+
   await QueryModel.deleteOne({ _id: id });
   return SuccessMessage(res, "Query deleted successfully");
 });
 
 export const getAllQueries = AsyncWrapper(async (req, res, next) => {
-  let queries = [];
+  const { page = 1, limit = 10, isReplied } = req.query;
+
+  // Pagination setup
+  const skip = (page - 1) * limit;
+
+  // Build filter conditions
+  const filter = {};
+
   if (
     req.user.role === USER_ROLES.customer ||
     req.user.role === USER_ROLES.controller
   ) {
-    queries = await QueryModel.find({ by: req.user._id }).sort({
-      createdAt: -1,
-    });
-  } else {
-    queries = await QueryModel.find().sort({ createdAt: -1 });
+    filter.by = req.user._id;
   }
-  return SuccessMessage(res, "Queries fetched successfully", queries);
+
+  // Apply isReplied filter only if it's provided (true/false)
+  if (isReplied !== undefined) {
+    filter.isReplied = isReplied === "true";
+  }
+
+  // Find queries with filter, pagination, and sorting
+  const queries = await QueryModel.find(filter)
+    .sort({ isReplied: 1, createdAt: -1 }) // unreplied first, then latest
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  // Get total count for pagination info
+  const totalCount = await QueryModel.countDocuments(filter);
+
+  return SuccessMessage(res, "Queries fetched successfully", {
+    paginations: {
+      totalRecords: totalCount,
+      page: parseInt(page),
+      totalPages: Math.ceil(totalCount / limit),
+      limit,
+    },
+    queries,
+  });
 });

@@ -1,6 +1,7 @@
 import Joi from "joi";
 import {
   SERVICE_STATUS,
+  SERVICE_VISIBILITY_STATUS,
   USER_ROLES,
   USER_STATUS,
 } from "../config/constants.js";
@@ -64,6 +65,12 @@ export const addEditServiceSchema = Joi.object({
       "any.only": `Status must be ${SERVICE_STATUS.active} or ${SERVICE_STATUS.blocked}`,
       "string.empty": "Status is required",
     }),
+  visibilityStatus: Joi.string()
+    .valid(...Object.values(SERVICE_VISIBILITY_STATUS))
+    .messages({
+      "any.only": `Visibility status must be ${SERVICE_VISIBILITY_STATUS.private} or ${SERVICE_VISIBILITY_STATUS.business}`,
+      "string.empty": "Visibility status is required",
+    }),
   price: Joi.number().required().min(0).messages({
     "number.base": "Price must be a number",
     "number.min": "Price must be at least 0",
@@ -80,6 +87,7 @@ export const querySchema = Joi.object({
     "string.empty": "Comment is required",
     "string.max": "Comment must not exceed 1000 characters",
   }),
+  email: emailSchema,
 });
 
 export const refreshTokenSchema = Joi.object({

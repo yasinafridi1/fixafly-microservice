@@ -21,7 +21,8 @@ export const controllerDTO = (data, role) => {
 };
 
 export const serviceDTO = (data) => {
-  const { name, image, description, price, _id, status } = data;
+  const { name, image, description, price, _id, status, visibilityStatus } =
+    data;
   return {
     name,
     image,
@@ -29,5 +30,6 @@ export const serviceDTO = (data) => {
     price,
     _id,
     status,
+    visibilityStatus,
   };
 };

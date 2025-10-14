@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
-import { SERVICE_STATUS } from "../config/constants.js";
+import {
+  SERVICE_STATUS,
+  SERVICE_VISIBILITY_STATUS,
+} from "../config/constants.js";
 
 const serviceSchema = new mongoose.Schema({
   name: {
@@ -22,6 +25,11 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     enum: Object.values(SERVICE_STATUS),
     default: SERVICE_STATUS.active,
+  },
+  visibilityStatus: {
+    type: String,
+    enum: Object.values(SERVICE_VISIBILITY_STATUS),
+    default: SERVICE_VISIBILITY_STATUS.private,
   },
   isDeleted: {
     type: Boolean,
