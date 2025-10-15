@@ -124,19 +124,13 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
   let filter = {};
   let servicesData = [];
 
-  // validate status
-  let uppercaseStatus;
-  if (status) {
-    const upper = status.toUpperCase();
-    if (Object.values(ORDER_STATUS).includes(upper)) {
-      uppercaseStatus = upper;
-    }
-  }
-
   if (role === USER_ROLES.company || role === USER_ROLES.customer) {
     filter = { customer: _id };
-    if (uppercaseStatus) {
-      filter.orderStatus = uppercaseStatus;
+    if (status) {
+      const statusArray = Array.isArray(status)
+        ? status
+        : status.split(",").map((s) => s.trim().toUpperCase());
+      filter.orderStatus = { $in: statusArray };
     }
   } else if (role === USER_ROLES.technician) {
     if (uppercaseStatus) {
@@ -410,10 +404,12 @@ export const allBookingAdmin = AsyncWrapper(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   let filter = {};
-  let servicesData = [];
 
   if (status) {
-    filter.status = status.toUpperCase();
+    const statusArray = Array.isArray(status)
+      ? status
+      : status.split(",").map((s) => s.trim().toUpperCase());
+    filter.orderStatus = { $in: statusArray };
   }
 
   // build query

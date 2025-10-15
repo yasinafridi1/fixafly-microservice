@@ -40,24 +40,19 @@ export const getAllCategories = AsyncWrapper(async (req, res, next) => {
   const pageNumber = parseInt(page, 10) || 1;
   const pageLimit = parseInt(limit, 10) || 10;
 
-  // ✅ Build filter query
   const filter = { isDeleted: false, status: SERVICE_STATUS.active };
 
-  // ✅ Search filter (by category name)
   if (search) {
     filter.name = { $regex: search, $options: "i" }; // case-insensitive
   }
 
-  // ✅ Count total categories
   const totalRecords = await ServiceModel.countDocuments(filter);
 
-  // ✅ Fetch paginated results
   const categories = await ServiceModel.find(filter)
     .sort({ createdAt: -1 })
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
 
-  // ✅ Transform data with DTO
   const serviceData = categories.map((item) => serviceDTO(item));
 
   return SuccessMessage(res, "Services fetched successfully", {
@@ -74,18 +69,15 @@ export const getAllCategories = AsyncWrapper(async (req, res, next) => {
 export const deleteCategory = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
-  // Find the category first
   const category = await ServiceModel.findById(id);
   if (!category) {
     return next(new ErrorHandler("Service not found", 404));
   }
 
-  // Delete image from S3 if exists
   if (category.image) {
     await deleteFileFromS3(category.image);
   }
 
-  // Soft delete the category
   category.isDeleted = true;
   await category.save();
 
@@ -96,24 +88,20 @@ export const updateCategory = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { name, description, price, status, visibilityStatus } = req.body;
 
-  // Find the category first
   const category = await ServiceModel.findOne({ _id: id, isDeleted: false });
   if (!category) {
     return next(new ErrorHandler("Service not found", 404));
   }
 
-  // Check for new image
   let imageUrl = category.image;
   if (req.file) {
-    // Delete previous image from S3 if exists
     if (category.image) {
       await deleteFileFromS3(category.image);
     }
-    // Upload new image
+
     imageUrl = await uploadFileToS3(req.file);
   }
 
-  // Update category
   category.name = name ? name.toLowerCase() : category.name;
   category.description = description || category.description;
   category.price = price !== undefined ? price : category.price;
@@ -131,7 +119,6 @@ export const updateCategory = AsyncWrapper(async (req, res, next) => {
 export const getCategoryById = AsyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
-  // Find category by ID and not deleted
   const category = await ServiceModel.findOne({ _id: id, isDeleted: false });
 
   if (!category) {

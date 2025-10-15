@@ -138,14 +138,15 @@ export const getAllTechnician = AsyncWrapper(async (req, res, next) => {
   const pageNumber = parseInt(page, 10) || 1;
   const pageLimit = parseInt(limit, 10) || 10;
 
-  // Build filter query
   const filter = { isDeleted: false };
-  // ✅ Status filter (BLOCKED / ACTIVE)
-  if (status && ["BLOCKED", "ACTIVE"].includes(status)) {
-    filter.status = status;
+
+  if (status) {
+    const statusArray = Array.isArray(status)
+      ? status
+      : status.split(",").map((s) => s.trim().toUpperCase());
+    filter.status = { $in: statusArray };
   }
 
-  // ✅ Search filter (fullName OR email)
   if (search) {
     filter.$or = [
       { fullName: { $regex: search, $options: "i" } },
@@ -153,12 +154,10 @@ export const getAllTechnician = AsyncWrapper(async (req, res, next) => {
     ];
   }
 
-  // ✅ Count total matching documents
   const totalRecords = await TechnicianModel.countDocuments(filter);
 
-  // ✅ Fetch paginated results
   const technicians = await TechnicianModel.find(filter)
-    .sort({ createdAt: -1 }) // latest first
+    .sort({ createdAt: -1 })
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
 

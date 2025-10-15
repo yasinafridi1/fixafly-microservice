@@ -70,10 +70,8 @@ export const deleteQuery = AsyncWrapper(async (req, res, next) => {
 export const getAllQueries = AsyncWrapper(async (req, res, next) => {
   const { page = 1, limit = 10, isReplied } = req.query;
 
-  // Pagination setup
   const skip = (page - 1) * limit;
 
-  // Build filter conditions
   const filter = {};
 
   if (
@@ -83,12 +81,15 @@ export const getAllQueries = AsyncWrapper(async (req, res, next) => {
     filter.by = req.user._id;
   }
 
-  // Apply isReplied filter only if it's provided (true/false)
   if (isReplied !== undefined) {
-    filter.isReplied = isReplied === "true";
+    if (Array.isArray(isReplied)) {
+      const boolValues = isReplied.map((v) => v === "true");
+      filter.isReplied = { $in: boolValues };
+    } else {
+      filter.isReplied = isReplied === "true";
+    }
   }
 
-  // Find queries with filter, pagination, and sorting
   const queries = await QueryModel.find(filter)
     .sort({ isReplied: 1, createdAt: -1 }) // unreplied first, then latest
     .skip(skip)

@@ -143,14 +143,22 @@ export const getAllUser = AsyncWrapper(async (req, res, next) => {
   const pageNumber = parseInt(page, 10) || 1;
   const pageLimit = parseInt(limit, 10) || 10;
 
-  // Build filter query
   const filter = { isDeleted: false };
-  // ✅ Status filter (BLOCKED / ACTIVE)
-  if (status && ["BLOCKED", "ACTIVE"].includes(status)) {
-    filter.status = status;
+
+  if (status) {
+    const statusArray = Array.isArray(status)
+      ? status
+      : status.split(",").map((s) => s.trim().toUpperCase());
+    filter.status = { $in: statusArray };
   }
 
-  // ✅ Search filter (fullName OR email)
+  if (role) {
+    const statusArray = Array.isArray(role)
+      ? role
+      : role.split(",").map((s) => s.trim().toUpperCase());
+    filter.role = { $in: statusArray };
+  }
+
   if (search) {
     filter.$or = [
       { fullName: { $regex: search, $options: "i" } },
