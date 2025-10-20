@@ -1,19 +1,12 @@
 FROM node:22.18.0-slim
 
-WORKDIR /service/admin
+WORKDIR /admin
 
+COPY package*.json ./
+RUN npm ci --only=production
 
-COPY services/admin/package*.json ./
-
-
-RUN npm install --production
-
-COPY services/admin/ ./
-
-COPY shared ./shared
+COPY . .
 
 EXPOSE 4001
 
-CMD ["node", "server.js"]
-
-
+CMD ["npm", "start"]

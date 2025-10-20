@@ -1,17 +1,15 @@
 FROM node:22.18.0-slim
 
-WORKDIR /service/auth
+WORKDIR /auth
 
+COPY package*.json ./
 
-COPY services/auth/package*.json ./
+RUN npm ci --only=production
 
-
-RUN npm install --production
-
-COPY services/auth/ ./
+COPY . .
 
 EXPOSE 4004
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
 
 

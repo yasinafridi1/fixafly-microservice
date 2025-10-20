@@ -1,19 +1,15 @@
 FROM node:22.18.0-slim
 
-WORKDIR /service/technician
+WORKDIR /technician
 
+COPY package*.json ./
 
-COPY services/technician/package*.json ./
+RUN npm ci --only=production
 
+COPY . .
 
-RUN npm install --production
+EXPOSE 4003
 
-COPY services/technician/ ./
-
-COPY shared ./shared
-
-EXPOSE 4001
-
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
 
 
