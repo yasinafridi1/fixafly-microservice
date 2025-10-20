@@ -1,14 +1,13 @@
 import express from "express";
+import envVariables from "./config/constants.js";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import dotenv from "dotenv";
 import router from "./routes/index.js";
 import ErrorMiddleware from "./middlewares/Error.js";
 
-dotenv.config();
+const { appPort } = envVariables;
 
 const app = express();
-const PORT = process.env.PORT || 4000;
 app.set("trust proxy", 1);
 const allowedUrls = ["http://localhost:5173", "http://www.localhost:5173"];
 
@@ -31,6 +30,6 @@ app.use(limiter);
 app.use("/api/v1", router);
 app.use(ErrorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Gateway server running on port ${PORT}`);
+app.listen(appPort, () => {
+  console.log(`Gateway server running on port ${appPort}`);
 });

@@ -1,5 +1,12 @@
 import express from "express";
 import createGatewayProxy from "../utils/proxyGateway.js";
+import envVariables from "../config/constants.js";
+const {
+  customerServiceUrl,
+  technicianServiceUrl,
+  authServiceUrl,
+  adminServiceUrl,
+} = envVariables;
 
 const router = express.Router();
 
@@ -10,7 +17,7 @@ router.get("/health", (req, res) => {
 router.use(
   "/admin",
   ...createGatewayProxy({
-    target: process.env.ADMIN_SERVICE_URL,
+    target: adminServiceUrl,
     pathRewrite: { "^/admin": "" },
   })
 );
@@ -18,28 +25,28 @@ router.use(
 router.use(
   "/service",
   ...createGatewayProxy({
-    target: `${process.env.ADMIN_SERVICE_URL}/service`,
+    target: `${adminServiceUrl}/service`,
   })
 );
 
 router.use(
   "/query",
   ...createGatewayProxy({
-    target: `${process.env.ADMIN_SERVICE_URL}/query`,
+    target: `${adminServiceUrl}/query`,
   })
 );
 
 router.use(
   "/banner",
   ...createGatewayProxy({
-    target: `${process.env.ADMIN_SERVICE_URL}/banner`,
+    target: `${adminServiceUrl}/banner`,
   })
 );
 
 router.use(
   "/technician",
   ...createGatewayProxy({
-    target: process.env.TECHNICIAN_SERVICE_URL,
+    target: technicianServiceUrl,
     pathRewrite: { "^/technician": "" },
   })
 );
@@ -47,7 +54,7 @@ router.use(
 router.use(
   "/customer",
   ...createGatewayProxy({
-    target: process.env.CUSTOMER_SERVICE_URL,
+    target: customerServiceUrl,
     pathRewrite: { "^/customer": "" },
   })
 );
@@ -55,7 +62,7 @@ router.use(
 router.use(
   "/booking",
   ...createGatewayProxy({
-    target: process.env.CUSTOMER_SERVICE_URL,
+    target: customerServiceUrl,
     pathRewrite: { "^/booking": "" },
   })
 );
@@ -63,7 +70,7 @@ router.use(
 router.use(
   "/auth",
   ...createGatewayProxy({
-    target: process.env.AUTH_SERVICE_URL,
+    target: authServiceUrl,
     pathRewrite: { "^/auth": "" },
   })
 );
