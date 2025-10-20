@@ -1,4 +1,4 @@
-import envVariables from "../../config/Constants.js";
+import envVariables from "../../config/constants.js";
 import nodemailer from "nodemailer";
 const { supportEmail, supportEmailPassword, smtpHost } = envVariables;
 

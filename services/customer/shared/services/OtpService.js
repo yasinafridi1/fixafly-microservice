@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import envVariables from "../../config/Constants.js";
+import envVariables from "../../config/constants.js";
 const { otpSecret } = envVariables;
 
 // Generate OTP and hashed value
