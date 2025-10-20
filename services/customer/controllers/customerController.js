@@ -3,7 +3,7 @@ import SuccessMessage from "../shared/utils/SuccessMessage.js";
 import AsyncWrapper from "../shared/utils/AsyncWrapper.js";
 import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import axiosInstance from "../shared/utils/AxiosInstance.js";
-import { sendOtpEmail } from "../shared/utils/EmailTemplates.js";
+import { sendOtpEmail } from "../shared/utils/Emailtemplates.js";
 import { generateOtp, verifyOtp } from "../shared/services/OtpService.js";
 import {
   generateShortToken,

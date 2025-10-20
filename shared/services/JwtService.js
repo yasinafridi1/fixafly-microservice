@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import envVariables from "../../config/Constants.js";
+import envVariables from "../../config/constants.js";
 
 const { accessTokenSecret, refreshTokenSecret, shortTokenSecret } =
   envVariables;
