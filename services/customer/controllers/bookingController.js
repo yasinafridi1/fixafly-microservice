@@ -133,7 +133,8 @@ export const getAllBookings = AsyncWrapper(async (req, res, next) => {
       filter.orderStatus = { $in: statusArray };
     }
   } else if (role === USER_ROLES.technician) {
-    if (uppercaseStatus) {
+    if (status) {
+      const uppercaseStatus = status.trim().toUpperCase();
       filter.orderStatus = uppercaseStatus;
       if (uppercaseStatus === ORDER_STATUS.new) {
         filter.nearestTechnicians = { $in: [_id] };
