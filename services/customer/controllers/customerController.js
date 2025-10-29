@@ -16,7 +16,7 @@ import CustomerModel from "../models/CustomerModel.js";
 const { authServiceUrl, updatePasswordTokenSecret } = envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, fcmToken } = req.body;
   const user = await CustomerModel.findOne({ email, isDeleted: false });
   if (!user) {
     return next(new ErrorHandler("Incorrect email or password", 400));
@@ -36,6 +36,8 @@ export const login = AsyncWrapper(async (req, res, next) => {
     const { data } = response.data;
     const { accessToken, refreshToken, role } = data;
     const userData = customerDto(user, role);
+    user.fcmToken = fcmToken;
+    await user.save();
     return SuccessMessage(res, "Logged in successfully", {
       userData,
       accessToken,

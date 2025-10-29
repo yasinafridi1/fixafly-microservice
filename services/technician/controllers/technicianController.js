@@ -13,7 +13,8 @@ import { locationObjBuilder } from "../helpers/location.js";
 const { authServiceUrl, customerServiceUrl } = envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, fcmToken } = req.body;
+  console.log("Login attempt for fcmToken:", fcmToken);
   const user = await TechnicianModel.findOne({ email, isDeleted: false });
   if (!user) {
     return next(new ErrorHandler("Incorrect email or password", 400));
@@ -36,6 +37,8 @@ export const login = AsyncWrapper(async (req, res, next) => {
     });
     const { data } = response.data;
     const { accessToken, refreshToken, role } = data;
+    user.fcmToken = fcmToken;
+    await user.save();
     const userData = technicianDTO(user, role);
     return SuccessMessage(res, "Logged in successfully", {
       userData,

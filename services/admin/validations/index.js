@@ -32,6 +32,7 @@ const passwordSchema = Joi.string()
 export const signinSchema = Joi.object({
   email: emailSchema, // or your own emailSchema
   password: Joi.string().required(),
+  fcmToken: Joi.string().optional(),
 });
 
 export const controllerSchema = Joi.object({

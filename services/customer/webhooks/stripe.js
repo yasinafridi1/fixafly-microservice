@@ -1,10 +1,14 @@
 import Stripe from "stripe";
-import envVariables, { PAYMENT_STATUS } from "../config/constants.js";
+import envVariables, {
+  NOTIFICATION_TOPICS,
+  notificationMessages,
+  PAYMENT_STATUS,
+} from "../config/constants.js";
 import BookingModel from "../models/BookingModel.js";
 import PaymentModel from "../models/PaymentModel.js";
 import axiosInstance from "../shared/utils/AxiosInstance.js";
 import { locationObjDesctructure } from "../helpers/location.js";
-import { set } from "mongoose";
+import { sendNotificationsToMultiple } from "../shared/services/Notification.js";
 const { stripeSecretKey, stripeWebhookKey, technicianServiceUrl } =
   envVariables;
 
@@ -68,14 +72,23 @@ export const stripeWebhook = async (req, res) => {
           console.log("Error fetching technicians===>", error);
         }
 
+        let fcmTokens = [];
+
         const ids = technicians?.map((tech) => {
           // send notifications to nearest technicians
+          const { fcmToken } = tech;
+          if (fcmToken) fcmTokens.push(fcmToken);
           return tech._id;
         });
         BookingModel.updateOne(
           { _id: orderId },
           { nearestTechnicians: ids }
         ).exec();
+        const { title, body } = notificationMessages(
+          NOTIFICATION_TOPICS.newOrderTechnician
+        );
+
+        await sendNotificationsToMultiple(fcmTokens, title, body);
       } catch (err) {
         console.log("Error in webhook processing===>", err);
       }

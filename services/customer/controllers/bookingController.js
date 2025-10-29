@@ -4,6 +4,8 @@ import ErrorHandler from "../shared/utils/ErrorHandler.js";
 import BookingModel from "../models/BookingModel.js";
 import axiosInstance from "../shared/utils/AxiosInstance.js";
 import envVariables, {
+  NOTIFICATION_TOPICS,
+  notificationMessages,
   ORDER_STATUS,
   PAYMENT_STATUS,
   USER_ROLES,
@@ -14,6 +16,10 @@ import { locationObjBuilder } from "../helpers/location.js";
 import CustomerModel from "../models/CustomerModel.js";
 import Stripe from "stripe";
 import { bookingAdminDTO, bookingDto } from "../helpers/dtos.js";
+import {
+  buildNotificationMessage,
+  sendNotification,
+} from "../shared/services/Notification.js";
 const { adminServiceUrl, technicianServiceUrl, stripeSecretKey } = envVariables;
 const stripe = new Stripe(stripeSecretKey);
 
@@ -350,7 +356,11 @@ export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
   const { status } = req.body;
   const { _id } = req.user;
 
-  const booking = await BookingModel.findOne({ _id: bookingId });
+  const booking = await BookingModel.findOne({ _id: bookingId }).populate(
+    "customer",
+    "_id fcmToken"
+  );
+  const previousStatus = booking.orderStatus;
   if (!booking) {
     return next(new ErrorHandler("Booking not found", 404));
   }
@@ -394,6 +404,24 @@ export const updateBookingStatus = AsyncWrapper(async (req, res, next) => {
   }
 
   await booking.save();
+  if (booking?.customer?.fcmToken) {
+    setImmediate(async () => {
+      try {
+        const { title, body } = notificationMessages(
+          NOTIFICATION_TOPICS.orderStatusUpdate,
+          { preStatus: previousStatus, status }
+        );
+        const notificationMessage = buildNotificationMessage(
+          booking.customer.fcmToken,
+          title,
+          body
+        );
+        await sendNotification(notificationMessage);
+      } catch (err) {
+        console.error("Error sending notification:", err);
+      }
+    });
+  }
   return SuccessMessage(res, "Booking status updated successfully");
 });
 

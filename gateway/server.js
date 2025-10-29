@@ -9,7 +9,7 @@ const { appPort } = envVariables;
 
 const app = express();
 app.set("trust proxy", 1);
-const allowedUrls = ["http://localhost:5173", "http://www.localhost:5173"];
+const allowedUrls = ["http://localhost:5173", "https://admin.fixafly.com"];
 
 const corsOption = {
   origin: allowedUrls,

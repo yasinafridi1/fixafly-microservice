@@ -8,7 +8,7 @@ import { adminDTO } from "../helpers/dtos.js";
 const { authServiceUrl } = envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, fcmToken } = req.body;
 
   try {
     const response = await axiosInstance.post(`${authServiceUrl}/auth/signin`, {
@@ -18,6 +18,8 @@ export const login = AsyncWrapper(async (req, res, next) => {
     const { data } = response.data;
     const { accessToken, refreshToken, role } = data;
     const user = await AdminModel.findOne({ email });
+    user.fcmToken = fcmToken;
+    await user.save();
     const userData = adminDTO(user, role);
     return SuccessMessage(res, "Logged in successfully", {
       userData,

@@ -55,3 +55,38 @@ export const ORDER_STATUS = {
 export const AMOUNT_PER_KM = 10;
 
 export default envVariables;
+
+export const notificationMessages = (type, data = {}) => {
+  const messages = {
+    NEW_ORDER_TECHNICIAN: {
+      title: "New Service Request",
+      body: "A new service request is available in your area. Check it out now!",
+    },
+    ORDER_STATUS_UPDATE: {
+      title: "Booking Status Updated",
+      body: `Your booking status has been updated from ${data.preStatus} to ${data.status}.`,
+    },
+    BOOKING_CREATED: {
+      title: "Booking Confirmed",
+      body: "A new booking has been created successfully.",
+    },
+    NEW_QUERY: {
+      title: "New Customer Query",
+      body: "You have received a new query from a customer. Please respond promptly.",
+    },
+  };
+
+  return (
+    messages[type] || {
+      title: "Notification",
+      body: "You have a new update.",
+    }
+  );
+};
+
+export const NOTIFICATION_TOPICS = {
+  newOrderTechnician: "NEW_ORDER_TECHNICIAN",
+  orderStatusUpdate: "ORDER_STATUS_UPDATE",
+  bookingCreated: "BOOKING_CREATED",
+  newQuery: "NEW_QUERY",
+};
