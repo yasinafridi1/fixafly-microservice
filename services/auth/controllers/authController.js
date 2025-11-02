@@ -82,7 +82,7 @@ export const register = AsyncWrapper(async (req, res, next) => {
 
 export const updatePassword = AsyncWrapper(async (req, res, next) => {
   const { token, password } = req.body;
-  const userData = verifyShortToken(token);
+  const userData = await verifyShortToken(token);
   const user = await LoginModel.findOne({ _id: userData._id });
   if (!user) {
     return next(new ErrorHandler("User not found", 404));

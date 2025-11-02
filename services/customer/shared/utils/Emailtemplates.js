@@ -10,8 +10,8 @@ export const sendOtpEmail = async (userEmail, otp) => {
         
         <!-- Header -->
         <tr>
-          <td style="background: #1966DA; padding: 20px; text-align: center;">
-            <img src="https://fixafly.s3.eu-north-1.amazonaws.com/uploads/logo.png" alt="Fixafly Logo" style="height: 50px;"/>
+          <td style="background: #1966DA; padding: 10px; text-align: center;">
+            <img src="https://fixafly.s3.eu-north-1.amazonaws.com/uploads/logo.png" alt="Fixafly Logo" style="height: 150px;"/>
           </td>
         </tr>
         
@@ -23,7 +23,7 @@ export const sendOtpEmail = async (userEmail, otp) => {
             <p><strong>Your One-Time Password (OTP) is:</strong></p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <div style="display: inline-block; padding: 15px 30px; background: #1966DA; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px; letter-spacing: 3px;">
+              <div style="display: inline-block; padding: 8px 30px; background: #1966DA; color: #ffffff; font-size: 24px; font-weight: bold; border-radius: 8px; letter-spacing: 3px;">
                 ${otp}
               </div>
             </div>
