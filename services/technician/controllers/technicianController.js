@@ -10,7 +10,8 @@ import uploadFileToS3, {
   deleteFileFromS3,
 } from "../shared/utils/AwsUtil.js";
 import { locationObjBuilder } from "../helpers/location.js";
-const { authServiceUrl, customerServiceUrl } = envVariables;
+const { authServiceUrl, customerServiceUrl, updatePasswordTokenSecret } =
+  envVariables;
 
 export const login = AsyncWrapper(async (req, res, next) => {
   const { email, password, fcmToken } = req.body;
@@ -450,7 +451,7 @@ export const updatePassword = AsyncWrapper(async (req, res, next) => {
     const response = await axiosInstance.patch(
       `${authServiceUrl}/auth/long/secret/path/update/password`,
       {
-        updatePasswordTokenSecret,
+        secret: updatePasswordTokenSecret,
         password,
         token,
       }

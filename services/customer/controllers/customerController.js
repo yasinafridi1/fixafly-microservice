@@ -384,7 +384,7 @@ export const updatePassword = AsyncWrapper(async (req, res, next) => {
     const response = await axiosInstance.patch(
       `${authServiceUrl}/auth/long/secret/path/update/password`,
       {
-        updatePasswordTokenSecret,
+        secret: updatePasswordTokenSecret,
         password,
         token,
       }
