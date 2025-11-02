@@ -11,7 +11,7 @@ export const sendOtpEmail = async (userEmail, otp) => {
         <!-- Header -->
         <tr>
           <td style="background: #1966DA; padding: 20px; text-align: center;">
-            <img src="https://fixafly.s3.eu-north-1.amazonaws.com/uploads/2b7aabe6cfec73c9d797d913879e8db8.png" alt="Fixafly Logo" style="height: 50px;"/>
+            <img src="https://fixafly.s3.eu-north-1.amazonaws.com/uploads/logo.png" alt="Fixafly Logo" style="height: 50px;"/>
           </td>
         </tr>
         

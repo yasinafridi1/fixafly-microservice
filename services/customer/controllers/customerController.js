@@ -317,8 +317,8 @@ export const forgetPassword = AsyncWrapper(async (req, res, next) => {
   user.passwordResetTries += 1;
   user.lastPasswordReset = now;
 
-  // Block for 3 days if reached 3 OTPs in 3 days
-  if (user.passwordResetTries >= 3) {
+  // Block for 3 days if reached 5 OTPs in 3 days
+  if (user.passwordResetTries >= 5) {
     user.passwordResetBlockUntil = new Date(
       now.getTime() + 3 * 24 * 60 * 60 * 1000
     );
@@ -381,7 +381,7 @@ export const updatePassword = AsyncWrapper(async (req, res, next) => {
   }
 
   try {
-    const response = await axiosInstance.post(
+    const response = await axiosInstance.patch(
       `${authServiceUrl}/auth/long/secret/path/update/password`,
       {
         updatePasswordTokenSecret,

@@ -3,10 +3,13 @@ import validateBody, {
   fileAndIdCardValidator,
 } from "../shared/middlewares/Validator.js";
 import {
+  sendOtpSchema,
   signinSchema,
   technicianSchema,
+  updatePasswordSchema,
   updateTechnicianSchema,
   userStatusSchema,
+  verifyOtpSchema,
 } from "../validations/index.js";
 import {
   newTechnician,
@@ -21,6 +24,9 @@ import {
   getDashboardChartData,
   getMultiTechnicians,
   getTechniciansStats,
+  forgetPassword,
+  OtpVerification,
+  updatePassword,
 } from "../controllers/technicianController.js";
 import upload, {
   uploadFileAndIdCard,
@@ -64,6 +70,18 @@ router
   );
 
 router.route("/nearest").get(getNearestTechnician);
+
+router
+  .route("/forget-password")
+  .post(validateBody(sendOtpSchema), forgetPassword);
+router
+  .route("/otp-verification")
+  .post(validateBody(verifyOtpSchema), OtpVerification);
+
+router
+  .route("/update-password")
+  .patch(validateBody(updatePasswordSchema), updatePassword);
+
 router
   .route("/status/:id")
   .patch([auth, roleAuthorization([USER_ROLES.admin])], updateTechnicianStatus);

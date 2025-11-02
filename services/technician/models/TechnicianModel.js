@@ -53,6 +53,9 @@ const technicianSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  passwordResetTries: { type: Number, default: 0 },
+  lastPasswordReset: { type: Date },
+  passwordResetBlockUntil: { type: Date },
 });
 
 technicianSchema.index({ location: "2dsphere" });
