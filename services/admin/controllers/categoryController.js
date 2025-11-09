@@ -190,7 +190,7 @@ export const getAllCategoriesAdmin = AsyncWrapper(async (req, res, next) => {
   const totalRecords = await ServiceModel.countDocuments(filter);
 
   const categories = await ServiceModel.find(filter)
-    .sort({ createdAt: -1 })
+    .sort({ _id: -1 })
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
 
